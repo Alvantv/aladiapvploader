@@ -1,14 +1,13 @@
 --[[
   ALADIA SCRIPT LOADER - PREMIUM VERSION
-  - "INVALID LICENSE KEY" text below account
-  - No "VERIFICATION SUCCESSFUL" text
-  - Key expiration system
+  - Time-based expiration (DD/MM/YYYY HH:MM)
   - Modern dark theme
   - Confirmation dialogs
+  - Loading animations
 ]]
 
 local function CreateMainGUI()
-    -- Dark color scheme
+    -- Color scheme
     local darkBackground = Color3.fromRGB(10, 10, 15)
     local darkerPanel = Color3.fromRGB(20, 20, 25)
     local darkestPanel = Color3.fromRGB(15, 15, 20)
@@ -25,7 +24,7 @@ local function CreateMainGUI()
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.ResetOnSpawn = false
 
-    -- Error handling for parent assignment
+    -- Parent GUI safely
     local success, err = pcall(function()
         ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     end)
@@ -34,7 +33,7 @@ local function CreateMainGUI()
         return
     end
 
-    -- Main container with shadow effect
+    -- Main container
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
@@ -63,7 +62,7 @@ local function CreateMainGUI()
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
 
-    -- 3-dot menu button (bottom right)
+    -- Menu button
     local MenuButton = Instance.new("ImageButton")
     MenuButton.Name = "MenuButton"
     MenuButton.Parent = MainFrame
@@ -75,19 +74,6 @@ local function CreateMainGUI()
     MenuButton.ImageRectSize = Vector2.new(36, 36)
     MenuButton.ImageColor3 = Color3.fromRGB(100, 100, 100)
     MenuButton.ZIndex = 2
-
-    -- Menu button hover effect
-    MenuButton.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(MenuButton, TweenInfo.new(0.2), {
-            ImageColor3 = textColor
-        }):Play()
-    end)
-
-    MenuButton.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(MenuButton, TweenInfo.new(0.2), {
-            ImageColor3 = Color3.fromRGB(100, 100, 100)
-        }):Play()
-    end)
 
     -- Notification function
     local function ShowNotification(message, color)
@@ -188,21 +174,6 @@ local function CreateMainGUI()
     PremiumStroke.Thickness = 1
     PremiumStroke.Parent = PremiumButton
 
-    -- Hover effects
-    PremiumButton.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = buttonHover,
-            TextColor3 = textColor
-        }):Play()
-    end)
-
-    PremiumButton.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = darkestPanel,
-            TextColor3 = textColor
-        }):Play()
-    end)
-
     -- Basic Button
     local BasicButton = Instance.new("TextButton")
     BasicButton.Name = "BasicButton"
@@ -220,27 +191,6 @@ local function CreateMainGUI()
     BasicCorner.CornerRadius = UDim.new(0, 6)
     BasicCorner.Parent = BasicButton
 
-    local BasicStroke = Instance.new("UIStroke")
-    BasicStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    BasicStroke.Color = Color3.fromRGB(60, 60, 70)
-    BasicStroke.Thickness = 1
-    BasicStroke.Parent = BasicButton
-
-    -- Hover effects
-    BasicButton.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = buttonHover,
-            TextColor3 = textColor
-        }):Play()
-    end)
-
-    BasicButton.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = darkestPanel,
-            TextColor3 = textColor
-        }):Play()
-    end)
-
     -- Footer
     local Footer = Instance.new("TextLabel")
     Footer.Name = "Footer"
@@ -249,11 +199,11 @@ local function CreateMainGUI()
     Footer.Position = UDim2.new(0, 0, 0.9, 0)
     Footer.Size = UDim2.new(1, 0, 0, 30)
     Footer.Font = Enum.Font.Gotham
-    Footer.Text = "ALADIA SCRIPT | DARK THEME"
+    Footer.Text = "ALADIA SCRIPT | TIME-BASED LICENSE"
     Footer.TextColor3 = Color3.fromRGB(100, 100, 100)
     Footer.TextSize = 12
 
-    -- Click sound function
+    -- Click sound
     local function PlayClickSound()
         local clickSound = Instance.new("Sound")
         clickSound.SoundId = "rbxassetid://138080526"
@@ -263,7 +213,57 @@ local function CreateMainGUI()
         game:GetService("Debris"):AddItem(clickSound, 2)
     end
 
-    -- Create modern confirmation dialog function
+    -- Time-based expiration check
+    local function IsKeyExpired(expDateTime)
+        -- Parse date and time in format DD/MM/YYYY HH:MM
+        local day, month, year, hour, minute = expDateTime:match("(%d+)/(%d+)/(%d+)%s+(%d+):(%d+)")
+        if not day or not month or not year or not hour or not minute then
+            -- Try parsing just date (backward compatibility)
+            day, month, year = expDateTime:match("(%d+)/(%d+)/(%d+)")
+            if not day or not month or not year then
+                return true -- Invalid format, treat as expired
+            end
+            hour = "23"
+            minute = "59"
+        end
+        
+        day = tonumber(day)
+        month = tonumber(month)
+        year = tonumber(year)
+        hour = tonumber(hour)
+        minute = tonumber(minute)
+        
+        local currentDateTime = os.date("*t")
+        
+        -- Compare dates first
+        if year > currentDateTime.year then
+            return false
+        elseif year < currentDateTime.year then
+            return true
+        else -- Same year
+            if month > currentDateTime.month then
+                return false
+            elseif month < currentDateTime.month then
+                return true
+            else -- Same month
+                if day > currentDateTime.day then
+                    return false
+                elseif day < currentDateTime.day then
+                    return true
+                else -- Same day, compare time
+                    if hour > currentDateTime.hour then
+                        return false
+                    elseif hour < currentDateTime.hour then
+                        return true
+                    else -- Same hour, compare minutes
+                        return minute < currentDateTime.min
+                    end
+                end
+            end
+        end
+    end
+
+    -- Confirmation dialog
     local function CreateConfirmationDialog(title, message, confirmCallback)
         -- Create overlay
         local Overlay = Instance.new("Frame")
@@ -274,7 +274,7 @@ local function CreateMainGUI()
         Overlay.Size = UDim2.new(1, 0, 1, 0)
         Overlay.ZIndex = 10
         
-        -- Dialog frame (centered on screen)
+        -- Dialog frame
         local DialogFrame = Instance.new("Frame")
         DialogFrame.Name = "DialogFrame"
         DialogFrame.Parent = Overlay
@@ -287,11 +287,6 @@ local function CreateMainGUI()
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 8)
         UICorner.Parent = DialogFrame
-        
-        local UIStroke = Instance.new("UIStroke")
-        UIStroke.Color = Color3.fromRGB(50, 50, 60)
-        UIStroke.Thickness = 1
-        UIStroke.Parent = DialogFrame
         
         -- Title
         local DialogTitle = Instance.new("TextLabel")
@@ -307,16 +302,6 @@ local function CreateMainGUI()
         DialogTitle.TextXAlignment = Enum.TextXAlignment.Left
         DialogTitle.ZIndex = 12
         
-        -- Divider line
-        local Divider = Instance.new("Frame")
-        Divider.Name = "Divider"
-        Divider.Parent = DialogFrame
-        Divider.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-        Divider.BorderSizePixel = 0
-        Divider.Size = UDim2.new(1, -20, 0, 1)
-        Divider.Position = UDim2.new(0, 10, 0, 60)
-        Divider.ZIndex = 12
-        
         -- Message
         local DialogMessage = Instance.new("TextLabel")
         DialogMessage.Name = "DialogMessage"
@@ -329,11 +314,9 @@ local function CreateMainGUI()
         DialogMessage.TextColor3 = Color3.fromRGB(180, 180, 180)
         DialogMessage.TextSize = 14
         DialogMessage.TextWrapped = true
-        DialogMessage.TextXAlignment = Enum.TextXAlignment.Left
-        DialogMessage.TextYAlignment = Enum.TextYAlignment.Top
         DialogMessage.ZIndex = 12
         
-        -- Button container
+        -- Buttons
         local ButtonContainer = Instance.new("Frame")
         ButtonContainer.Name = "ButtonContainer"
         ButtonContainer.Parent = DialogFrame
@@ -342,7 +325,6 @@ local function CreateMainGUI()
         ButtonContainer.Position = UDim2.new(0, 10, 1, -50)
         ButtonContainer.ZIndex = 12
         
-        -- No Button (left)
         local NoButton = Instance.new("TextButton")
         NoButton.Name = "NoButton"
         NoButton.Parent = ButtonContainer
@@ -356,16 +338,6 @@ local function CreateMainGUI()
         NoButton.AutoButtonColor = false
         NoButton.ZIndex = 13
         
-        local NoCorner = Instance.new("UICorner")
-        NoCorner.CornerRadius = UDim.new(0, 6)
-        NoCorner.Parent = NoButton
-        
-        local NoStroke = Instance.new("UIStroke")
-        NoStroke.Color = Color3.fromRGB(70, 70, 80)
-        NoStroke.Thickness = 1
-        NoStroke.Parent = NoButton
-        
-        -- Yes Button (right)
         local YesButton = Instance.new("TextButton")
         YesButton.Name = "YesButton"
         YesButton.Parent = ButtonContainer
@@ -378,53 +350,6 @@ local function CreateMainGUI()
         YesButton.TextSize = 14
         YesButton.AutoButtonColor = false
         YesButton.ZIndex = 13
-        
-        local YesCorner = Instance.new("UICorner")
-        YesCorner.CornerRadius = UDim.new(0, 6)
-        YesCorner.Parent = YesButton
-        
-        local YesStroke = Instance.new("UIStroke")
-        YesStroke.Color = accentColor
-        YesStroke.Thickness = 1
-        YesStroke.Parent = YesButton
-        
-        -- Button hover effects
-        YesButton.MouseEnter:Connect(function()
-            game:GetService("TweenService"):Create(YesButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = buttonHover,
-                TextColor3 = accentColor
-            }):Play()
-        end)
-        
-        YesButton.MouseLeave:Connect(function()
-            game:GetService("TweenService"):Create(YesButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = darkestPanel,
-                TextColor3 = textColor
-            }):Play()
-        end)
-        
-        NoButton.MouseEnter:Connect(function()
-            game:GetService("TweenService"):Create(NoButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = buttonHover,
-                TextColor3 = errorRed
-            }):Play()
-        end)
-        
-        NoButton.MouseLeave:Connect(function()
-            game:GetService("TweenService"):Create(NoButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = darkestPanel,
-                TextColor3 = textColor
-            }):Play()
-        end)
-        
-        -- Animation
-        DialogFrame.Size = UDim2.new(0, 0, 0, 0)
-        DialogFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        
-        game:GetService("TweenService"):Create(DialogFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 320, 0, 200),
-            Position = UDim2.new(0.5, -160, 0.5, -100)
-        }):Play()
         
         -- Button functionality
         local function CloseDialog()
@@ -452,84 +377,37 @@ local function CreateMainGUI()
             CloseDialog()
             confirmCallback(false)
         end)
-    end
-
-    -- Function to check if key is expired
-    local function IsKeyExpired(expDate)
-        -- Parse date in format DD/MM/YYYY
-        local day, month, year = expDate:match("(%d+)/(%d+)/(%d+)")
-        if not day or not month or not year then
-            return true -- Invalid date format, treat as expired
-        end
         
-        day = tonumber(day)
-        month = tonumber(month)
-        year = tonumber(year)
+        -- Animate in
+        DialogFrame.Size = UDim2.new(0, 0, 0, 0)
+        DialogFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         
-        local currentDate = os.date("*t")
-        local currentDay = currentDate.day
-        local currentMonth = currentDate.month
-        local currentYear = currentDate.year
-        
-        -- Compare dates
-        if year > currentYear then
-            return false
-        elseif year < currentYear then
-            return true
-        else -- Same year
-            if month > currentMonth then
-                return false
-            elseif month < currentMonth then
-                return true
-            else -- Same month
-                return day < currentDay
-            end
-        end
+        game:GetService("TweenService"):Create(DialogFrame, TweenInfo.new(0.3), {
+            Size = UDim2.new(0, 320, 0, 200),
+            Position = UDim2.new(0.5, -160, 0.5, -100)
+        }):Play()
     end
 
     -- Premium Button Functionality
     PremiumButton.MouseButton1Click:Connect(function()
         PlayClickSound()
         
-        -- Animate button press
-        game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.1), {
-            Size = UDim2.new(0, 290, 0, 45)
-        }):Play()
-        
-        task.wait(0.1)
-        game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.1), {
-            Size = UDim2.new(0, 300, 0, 50)
-        }):Play()
-        
         -- Hide main buttons
         PremiumButton.Visible = false
         BasicButton.Visible = false
         
-        -- Animate title change
-        game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-            TextTransparency = 1
-        }):Play()
-        
-        task.wait(0.3)
+        -- Change title
         Title.Text = "ENTER LICENSE KEY"
-        game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-            TextTransparency = 0
-        }):Play()
-
+        
         -- License Frame
         local LicenseFrame = Instance.new("Frame")
         LicenseFrame.Name = "LicenseFrame"
         LicenseFrame.Parent = MainFrame
         LicenseFrame.BackgroundTransparency = 1
         LicenseFrame.Size = UDim2.new(1, 0, 1, -50)
-        LicenseFrame.Position = UDim2.new(0, 0, 1, 0)
+        LicenseFrame.Position = UDim2.new(0, 0, 0, 50)
         
-        -- Animate entrance
-        game:GetService("TweenService"):Create(LicenseFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
-            Position = UDim2.new(0, 0, 0, 50)
-        }):Play()
-
-        -- Current Username Display
+        -- Current Username
         local currentUsername = game.Players.LocalPlayer.Name
         local UsernameLabel = Instance.new("TextLabel")
         UsernameLabel.Name = "UsernameLabel"
@@ -542,55 +420,28 @@ local function CreateMainGUI()
         UsernameLabel.TextColor3 = accentColor
         UsernameLabel.TextSize = 14
         UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        UsernameLabel.TextTransparency = 1
         
-        game:GetService("TweenService"):Create(UsernameLabel, TweenInfo.new(0.5), {
-            TextTransparency = 0
-        }):Play()
-
-        -- Status Label (for error messages)
+        -- Status Label
         local StatusLabel = Instance.new("TextLabel")
         StatusLabel.Name = "StatusLabel"
         StatusLabel.Parent = LicenseFrame
         StatusLabel.BackgroundTransparency = 1
-        StatusLabel.Position = UDim2.new(0, 20, 0.2, 0) -- Positioned below account
+        StatusLabel.Position = UDim2.new(0, 20, 0.2, 0)
         StatusLabel.Size = UDim2.new(1, -40, 0, 20)
         StatusLabel.Font = Enum.Font.GothamBold
         StatusLabel.Text = ""
         StatusLabel.TextColor3 = errorRed
         StatusLabel.TextSize = 14
         StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-        StatusLabel.TextTransparency = 1
         
-        game:GetService("TweenService"):Create(StatusLabel, TweenInfo.new(0.5), {
-            TextTransparency = 0
-        }):Play()
-
-        -- Key Input Container
+        -- Key Input
         local KeyInputContainer = Instance.new("Frame")
         KeyInputContainer.Name = "KeyInputContainer"
         KeyInputContainer.Parent = LicenseFrame
         KeyInputContainer.BackgroundColor3 = darkestPanel
         KeyInputContainer.Position = UDim2.new(0.5, -140, 0.4, 0)
         KeyInputContainer.Size = UDim2.new(0, 280, 0, 50)
-        KeyInputContainer.ClipsDescendants = true
-        KeyInputContainer.BackgroundTransparency = 1
-
-        local KeyInputContainerCorner = Instance.new("UICorner")
-        KeyInputContainerCorner.CornerRadius = UDim.new(0, 6)
-        KeyInputContainerCorner.Parent = KeyInputContainer
-
-        local ContainerStroke = Instance.new("UIStroke")
-        ContainerStroke.Color = Color3.fromRGB(60, 60, 70)
-        ContainerStroke.Thickness = 1
-        ContainerStroke.Parent = KeyInputContainer
-
-        -- Animate container appearance
-        game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(0.5), {
-            BackgroundTransparency = 0
-        }):Play()
-
-        -- Key Input
+        
         local KeyInput = Instance.new("TextBox")
         KeyInput.Name = "KeyInput"
         KeyInput.Parent = KeyInputContainer
@@ -602,56 +453,7 @@ local function CreateMainGUI()
         KeyInput.Text = ""
         KeyInput.TextColor3 = textColor
         KeyInput.TextSize = 14
-        KeyInput.ClearTextOnFocus = false
-        KeyInput.TextTransparency = 1
-
-        game:GetService("TweenService"):Create(KeyInput, TweenInfo.new(0.5), {
-            TextTransparency = 0
-        }):Play()
-
-        -- Back Button
-        local BackButton = Instance.new("TextButton")
-        BackButton.Name = "BackButton"
-        BackButton.Parent = LicenseFrame
-        BackButton.BackgroundColor3 = darkestPanel
-        BackButton.Position = UDim2.new(0.5, -140, 0.8, 0)
-        BackButton.Size = UDim2.new(0, 280, 0, 50)
-        BackButton.Font = Enum.Font.GothamBold
-        BackButton.Text = "BACK"
-        BackButton.TextColor3 = textColor
-        BackButton.TextSize = 16
-        BackButton.AutoButtonColor = false
-        BackButton.BackgroundTransparency = 1
-
-        local BackCorner = Instance.new("UICorner")
-        BackCorner.CornerRadius = UDim.new(0, 6)
-        BackCorner.Parent = BackButton
-
-        local BackStroke = Instance.new("UIStroke")
-        BackStroke.Color = Color3.fromRGB(70, 50, 50)
-        BackStroke.Thickness = 1
-        BackStroke.Parent = BackButton
-
-        -- Animate back button appearance
-        game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.5), {
-            BackgroundTransparency = 0
-        }):Play()
-
-        -- Hover effects for back button
-        BackButton.MouseEnter:Connect(function()
-            game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = buttonHover,
-                TextColor3 = errorRed
-            }):Play()
-        end)
-
-        BackButton.MouseLeave:Connect(function()
-            game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = darkestPanel,
-                TextColor3 = textColor
-            }):Play()
-        end)
-
+        
         -- Verify Button
         local VerifyButton = Instance.new("TextButton")
         VerifyButton.Name = "VerifyButton"
@@ -664,116 +466,48 @@ local function CreateMainGUI()
         VerifyButton.TextColor3 = textColor
         VerifyButton.TextSize = 16
         VerifyButton.AutoButtonColor = false
-        VerifyButton.BackgroundTransparency = 1
-
-        local VerifyCorner = Instance.new("UICorner")
-        VerifyCorner.CornerRadius = UDim.new(0, 6)
-        VerifyCorner.Parent = VerifyButton
-
-        local VerifyStroke = Instance.new("UIStroke")
-        VerifyStroke.Color = accentColor
-        VerifyStroke.Thickness = 1
-        VerifyStroke.Parent = VerifyButton
-
-        -- Animate verify button appearance
-        game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.5), {
-            BackgroundTransparency = 0
-        }):Play()
-
-        -- Hover effects for verify button
-        VerifyButton.MouseEnter:Connect(function()
-            game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = buttonHover,
-                TextColor3 = accentColor
-            }):Play()
-        end)
-
-        VerifyButton.MouseLeave:Connect(function()
-            game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.2), {
-                BackgroundColor3 = darkestPanel,
-                TextColor3 = textColor
-            }):Play()
-        end)
-
-        -- Back Button Functionality with animation
+        
+        -- Back Button
+        local BackButton = Instance.new("TextButton")
+        BackButton.Name = "BackButton"
+        BackButton.Parent = LicenseFrame
+        BackButton.BackgroundColor3 = darkestPanel
+        BackButton.Position = UDim2.new(0.5, -140, 0.8, 0)
+        BackButton.Size = UDim2.new(0, 280, 0, 50)
+        BackButton.Font = Enum.Font.GothamBold
+        BackButton.Text = "BACK"
+        BackButton.TextColor3 = textColor
+        BackButton.TextSize = 16
+        BackButton.AutoButtonColor = false
+        
+        -- Back Button Functionality
         BackButton.MouseButton1Click:Connect(function()
             PlayClickSound()
-            
-            -- Animate exit
-            game:GetService("TweenService"):Create(LicenseFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
-                Position = UDim2.new(0, 0, 1, 0)
-            }):Play()
-            
-            game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-                TextTransparency = 1
-            }):Play()
-            
-            task.wait(0.3)
-            Title.Text = "ALADIA SCRIPT LOADER"
-            game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-                TextTransparency = 0
-            }):Play()
-            
-            task.wait(0.4)
             LicenseFrame:Destroy()
+            Title.Text = "ALADIA SCRIPT LOADER"
             PremiumButton.Visible = true
             BasicButton.Visible = true
         end)
-
-        -- Verify Functionality with enhanced feedback
+        
+        -- Verify Functionality
         VerifyButton.MouseButton1Click:Connect(function()
             PlayClickSound()
-            
-            -- Animate button press
-            game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.1), {
-                Size = UDim2.new(0, 270, 0, 45)
-            }):Play()
-            
-            task.wait(0.1)
-            
-            game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.1), {
-                Size = UDim2.new(0, 280, 0, 50)
-            }):Play()
             
             local enteredKey = KeyInput.Text
             enteredKey = string.upper(enteredKey:gsub("%s+", ""))
             
             if enteredKey == "" then
                 StatusLabel.Text = "PLEASE ENTER A VALID KEY"
-                StatusLabel.TextColor3 = errorRed
-                
-                -- Shake animation for error
-                local shakeTime = 0.3
-                local shakeOffset = 5
-                
-                local originalPos = KeyInputContainer.Position
-                
-                for i = 1, 3 do
-                    game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(shakeTime/6), {
-                        Position = originalPos + UDim2.new(0, shakeOffset, 0, 0)
-                    }):Play()
-                    task.wait(shakeTime/6)
-                    game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(shakeTime/6), {
-                        Position = originalPos - UDim2.new(0, shakeOffset, 0, 0)
-                    }):Play()
-                    task.wait(shakeTime/6)
-                end
-                
-                game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(shakeTime/6), {
-                    Position = originalPos
-                }):Play()
-                
                 return
             end
 
-            -- Get whitelist from Pastebin (REPLACE WITH YOUR PASTEBIN URL)
+            -- Get whitelist from Pastebin
             local success, whitelist = pcall(function()
                 return game:HttpGet("https://pastebin.com/raw/DxMGTLAn")
             end)
             
             if not success then
                 StatusLabel.Text = "CONNECTION ERROR"
-                StatusLabel.TextColor3 = errorRed
                 return
             end
 
@@ -784,7 +518,7 @@ local function CreateMainGUI()
             local expirationDate = ""
             
             for line in whitelist:gmatch("[^\r\n]+") do
-                local user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(%S+)")
+                local user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
                 if user and key and exp then
                     if string.lower(user) == string.lower(currentUsername) 
                        and string.upper(key) == enteredKey then
@@ -801,42 +535,27 @@ local function CreateMainGUI()
                 if isExpired then
                     StatusLabel.Text = "LICENSE EXPIRED ("..expirationDate..")"
                     StatusLabel.TextColor3 = errorRed
-                    
-                    -- Pulse animation for error
-                    game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(0.2), {
-                        BackgroundColor3 = Color3.fromRGB(40, 30, 30)
-                    }):Play()
-                    
-                    task.wait(0.2)
-                    
-                    game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(0.5), {
-                        BackgroundColor3 = darkestPanel
-                    }):Play()
                 else
-                    -- Clear any previous error messages
                     StatusLabel.Text = ""
                     
-                    -- Show confirmation dialog before loading premium script
                     CreateConfirmationDialog(
                         "PREMIUM SCRIPT", 
                         "Are you sure you want to load the premium script?\nExpires: "..expirationDate,
                         function(confirmed)
                             if confirmed then
-                                -- Create loading animation at bottom
+                                -- Loading animation
                                 local LoadingFrame = Instance.new("Frame")
                                 LoadingFrame.Name = "LoadingFrame"
                                 LoadingFrame.Parent = MainFrame
                                 LoadingFrame.BackgroundColor3 = darkestPanel
-                                LoadingFrame.BorderSizePixel = 0
-                                LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
                                 LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
+                                LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
                                 LoadingFrame.AnchorPoint = Vector2.new(0, 1)
                                 
                                 local LoadingBar = Instance.new("Frame")
                                 LoadingBar.Name = "LoadingBar"
                                 LoadingBar.Parent = LoadingFrame
                                 LoadingBar.BackgroundColor3 = accentColor
-                                LoadingBar.BorderSizePixel = 0
                                 LoadingBar.Size = UDim2.new(0, 0, 1, 0)
 
                                 local LoadingText = Instance.new("TextLabel")
@@ -849,7 +568,7 @@ local function CreateMainGUI()
                                 LoadingText.TextColor3 = textColor
                                 LoadingText.TextSize = 14
 
-                                local duration = 5 -- 5-second loading for premium
+                                local duration = 5
                                 local startTime = tick()
                                 
                                 local function update()
@@ -870,9 +589,6 @@ local function CreateMainGUI()
                                 end
                                 
                                 update()
-                            else
-                                -- User chose not to load the script
-                                ShowNotification("Premium script loading canceled", warningYellow)
                             end
                         end
                     )
@@ -880,72 +596,36 @@ local function CreateMainGUI()
             else
                 StatusLabel.Text = "INVALID LICENSE KEY"
                 StatusLabel.TextColor3 = errorRed
-                
-                -- Pulse animation for error
-                game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(0.2), {
-                    BackgroundColor3 = Color3.fromRGB(40, 30, 30)
-                }):Play()
-                
-                task.wait(0.2)
-                
-                game:GetService("TweenService"):Create(KeyInputContainer, TweenInfo.new(0.5), {
-                    BackgroundColor3 = darkestPanel
-                }):Play()
             end
         end)
     end)
 
-    -- Basic Button Functionality with confirmation dialog
+    -- Basic Button Functionality
     BasicButton.MouseButton1Click:Connect(function()
         PlayClickSound()
         
-        -- Animate button press
-        game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.1), {
-            Size = UDim2.new(0, 290, 0, 45)
-        }):Play()
-        
-        task.wait(0.1)
-        
-        game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.1), {
-            Size = UDim2.new(0, 300, 0, 50)
-        }):Play()
-        
-        -- Show confirmation dialog
         CreateConfirmationDialog(
             "BASIC SCRIPT", 
             "Are you sure you want to load the basic script?",
             function(confirmed)
                 if confirmed then
-                    -- Hide main buttons
                     PremiumButton.Visible = false
                     BasicButton.Visible = false
-                    
-                    -- Animate title change
-                    game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-                        TextTransparency = 1
-                    }):Play()
-                    
-                    task.wait(0.3)
                     Title.Text = "LOADING BASIC..."
-                    game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3), {
-                        TextTransparency = 0
-                    }):Play()
                     
-                    -- Create loading animation at bottom
+                    -- Loading animation
                     local LoadingFrame = Instance.new("Frame")
                     LoadingFrame.Name = "LoadingFrame"
                     LoadingFrame.Parent = MainFrame
                     LoadingFrame.BackgroundColor3 = darkestPanel
-                    LoadingFrame.BorderSizePixel = 0
-                    LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
                     LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
+                    LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
                     LoadingFrame.AnchorPoint = Vector2.new(0, 1)
                     
                     local LoadingBar = Instance.new("Frame")
                     LoadingBar.Name = "LoadingBar"
                     LoadingBar.Parent = LoadingFrame
                     LoadingBar.BackgroundColor3 = accentColor
-                    LoadingBar.BorderSizePixel = 0
                     LoadingBar.Size = UDim2.new(0, 0, 1, 0)
 
                     local LoadingText = Instance.new("TextLabel")
@@ -958,7 +638,7 @@ local function CreateMainGUI()
                     LoadingText.TextColor3 = textColor
                     LoadingText.TextSize = 14
 
-                    local duration = 3 -- 3-second loading for basic
+                    local duration = 3
                     local startTime = tick()
                     
                     local function update()
@@ -979,24 +659,17 @@ local function CreateMainGUI()
                     end
                     
                     update()
-                else
-                    -- User chose not to load the script
-                    ShowNotification("Basic script loading canceled", warningYellow)
                 end
             end
         )
     end)
 end
 
--- Enhanced error handling
-local success, err = pcall(function()
-    CreateMainGUI()
-end)
-
+-- Error handling
+local success, err = pcall(CreateMainGUI)
 if not success then
     warn("ALADIA LOADER ERROR: "..tostring(err))
     
-    -- Create error message GUI
     local ErrorGui = Instance.new("ScreenGui")
     ErrorGui.Name = "ErrorGui"
     ErrorGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
@@ -1022,7 +695,6 @@ if not success then
     ErrorMsg.TextWrapped = true
     ErrorMsg.Parent = ErrorFrame
     
-    -- Auto-close after 5 seconds
     task.delay(5, function()
         ErrorGui:Destroy()
     end)
