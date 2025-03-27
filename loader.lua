@@ -1,5 +1,6 @@
 --[[
   ALADIA SCRIPT LOADER - PREMIUM VERSION
+  - Full-screen note display
   - Time-based expiration (DD/MM/YYYY HH:MM)
   - Modern dark theme
   - Confirmation dialogs
@@ -16,6 +17,7 @@ local function CreateMainGUI()
     local successGreen = Color3.fromRGB(50, 150, 50)
     local accentColor = Color3.fromRGB(70, 130, 150)
     local warningYellow = Color3.fromRGB(150, 130, 50)
+    local warningRed = Color3.fromRGB(150, 50, 50)
     local buttonHover = Color3.fromRGB(35, 35, 40)
 
     -- Main GUI
@@ -215,13 +217,11 @@ local function CreateMainGUI()
 
     -- Time-based expiration check
     local function IsKeyExpired(expDateTime)
-        -- Parse date and time in format DD/MM/YYYY HH:MM
         local day, month, year, hour, minute = expDateTime:match("(%d+)/(%d+)/(%d+)%s+(%d+):(%d+)")
         if not day or not month or not year or not hour or not minute then
-            -- Try parsing just date (backward compatibility)
             day, month, year = expDateTime:match("(%d+)/(%d+)/(%d+)")
             if not day or not month or not year then
-                return true -- Invalid format, treat as expired
+                return true
             end
             hour = "23"
             minute = "59"
@@ -235,32 +235,178 @@ local function CreateMainGUI()
         
         local currentDateTime = os.date("*t")
         
-        -- Compare dates first
         if year > currentDateTime.year then
             return false
         elseif year < currentDateTime.year then
             return true
-        else -- Same year
+        else
             if month > currentDateTime.month then
                 return false
             elseif month < currentDateTime.month then
                 return true
-            else -- Same month
+            else
                 if day > currentDateTime.day then
                     return false
                 elseif day < currentDateTime.day then
                     return true
-                else -- Same day, compare time
+                else
                     if hour > currentDateTime.hour then
                         return false
                     elseif hour < currentDateTime.hour then
                         return true
-                    else -- Same hour, compare minutes
+                    else
                         return minute < currentDateTime.min
                     end
                 end
             end
         end
+    end
+
+    -- Full-screen note display (FULL SCREEN VERSION)
+    local function ShowFullScreenNote(message)
+        -- Create overlay
+        local NoteOverlay = Instance.new("Frame")
+        NoteOverlay.Name = "NoteOverlay"
+        NoteOverlay.Parent = ScreenGui
+        NoteOverlay.BackgroundColor3 = darkestPanel
+        NoteOverlay.Size = UDim2.new(1, 0, 1, 0)
+        NoteOverlay.ZIndex = 50
+        
+        -- Main container (full screen with padding)
+        local NoteContainer = Instance.new("Frame")
+        NoteContainer.Name = "NoteContainer"
+        NoteContainer.Parent = NoteOverlay
+        NoteContainer.BackgroundColor3 = darkerPanel
+        NoteContainer.Size = UDim2.new(1, -40, 1, -40)
+        NoteContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+        NoteContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+        NoteContainer.ZIndex = 51
+        
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(0, 8)
+        UICorner.Parent = NoteContainer
+        
+        -- Title bar
+        local TitleBar = Instance.new("Frame")
+        TitleBar.Name = "TitleBar"
+        TitleBar.Parent = NoteContainer
+        TitleBar.BackgroundColor3 = darkestPanel
+        TitleBar.Size = UDim2.new(1, 0, 0, 60)
+        TitleBar.Position = UDim2.new(0, 0, 0, 0)
+        
+        local Title = Instance.new("TextLabel")
+        Title.Name = "Title"
+        Title.Parent = TitleBar
+        Title.BackgroundTransparency = 1
+        Title.Size = UDim2.new(1, -40, 1, 0)
+        Title.Position = UDim2.new(0, 20, 0, 0)
+        Title.Font = Enum.Font.GothamBold
+        Title.Text = "DEVELOPER MESSAGE | KemilingHUB"
+        Title.TextColor3 = warningYellow
+        Title.TextSize = 24
+        Title.TextXAlignment = Enum.TextXAlignment.Left
+        Title.ZIndex = 52
+        
+        -- Warning text
+        local WarningText = Instance.new("TextLabel")
+        WarningText.Name = "WarningText"
+        WarningText.Parent = NoteContainer
+        WarningText.BackgroundTransparency = 1
+        WarningText.Size = UDim2.new(1, -40, 0, 40)  -- Increased height for better visibility
+        WarningText.Position = UDim2.new(0, 20, 0.2, 50)  -- Positioned above the scroll frame
+        WarningText.Font = Enum.Font.GothamBold
+        WarningText.Text = "⚠ WARNING ⚠"
+        WarningText.TextColor3 = warningRed
+        WarningText.TextSize = 44  -- Larger text size
+        WarningText.ZIndex = 52
+        WarningText.TextYAlignment = Enum.TextYAlignment.Bottom  -- Align text to bottom of the label
+
+        -- Message area (scrolling)
+        local ScrollFrame = Instance.new("ScrollingFrame")
+        ScrollFrame.Name = "ScrollFrame"
+        ScrollFrame.Parent = NoteContainer
+        ScrollFrame.BackgroundTransparency = 1
+        ScrollFrame.Size = UDim2.new(1, -40, 0.6, 0)
+        ScrollFrame.Position = UDim2.new(0, 20, 0.5, 0)  -- Adjusted position to be below warning text
+        ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        ScrollFrame.ScrollBarThickness = 8
+        ScrollFrame.ZIndex = 52
+        ScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y  -- Ensure vertical scrolling only
+        
+        -- Message text (centered and full width)
+        local MessageText = Instance.new("TextLabel")
+        MessageText.Name = "MessageText"
+        MessageText.Parent = ScrollFrame
+        MessageText.BackgroundTransparency = 1
+        MessageText.Size = UDim2.new(1, 0, 0, 0)
+        MessageText.Font = Enum.Font.GothamBold  -- Changed to bold font
+        MessageText.Text = message
+        MessageText.TextColor3 = textColor
+        MessageText.TextSize = 20
+        MessageText.TextWrapped = true
+        MessageText.TextXAlignment = Enum.TextXAlignment.Center
+        MessageText.TextYAlignment = Enum.TextYAlignment.Top
+        MessageText.AutomaticSize = Enum.AutomaticSize.Y
+        MessageText.ZIndex = 52
+        
+        MessageText:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, MessageText.TextBounds.Y + 20)
+        end)
+        
+        -- Close button (large and centered)
+        local CloseButton = Instance.new("TextButton")
+        CloseButton.Name = "CloseButton"
+        CloseButton.Parent = NoteContainer
+        CloseButton.BackgroundColor3 = darkestPanel
+        CloseButton.Size = UDim2.new(0.6, 0, 0, 60)
+        CloseButton.Position = UDim2.new(0.2, 0, 0.9, -30)
+        CloseButton.Font = Enum.Font.GothamBold
+        CloseButton.Text = "CLOSE MESSAGE"
+        CloseButton.TextColor3 = textColor
+        CloseButton.TextSize = 18
+        CloseButton.AutoButtonColor = false
+        CloseButton.ZIndex = 52
+        
+        local UICorner2 = Instance.new("UICorner")
+        UICorner2.CornerRadius = UDim.new(0, 6)
+        UICorner2.Parent = CloseButton
+        
+        -- Button hover effects
+        CloseButton.MouseEnter:Connect(function()
+            game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = buttonHover
+            }):Play()
+        end)
+        
+        CloseButton.MouseLeave:Connect(function()
+            game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = darkestPanel
+            }):Play()
+        end)
+        
+        -- Button functionality
+        CloseButton.MouseButton1Click:Connect(function()
+            PlayClickSound()
+            game:GetService("TweenService"):Create(NoteOverlay, TweenInfo.new(0.3), {
+                BackgroundTransparency = 1
+            }):Play()
+            task.wait(0.3)
+            NoteOverlay:Destroy()
+        end)
+        
+        -- Animate in (full screen)
+        NoteOverlay.BackgroundTransparency = 1
+        NoteContainer.Size = UDim2.new(0, 0, 0, 0)
+        NoteContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+        
+        game:GetService("TweenService"):Create(NoteOverlay, TweenInfo.new(0.3), {
+            BackgroundTransparency = 0
+        }):Play()
+        
+        game:GetService("TweenService"):Create(NoteContainer, TweenInfo.new(0.3), {
+            Size = UDim2.new(1, -40, 1, -40),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        }):Play()
     end
 
     -- Confirmation dialog
@@ -516,17 +662,32 @@ local function CreateMainGUI()
             local isPremium = false
             local isExpired = false
             local expirationDate = ""
+            local note = ""
             
             for line in whitelist:gmatch("[^\r\n]+") do
-                local user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
-                if user and key and exp then
+                -- Pattern untuk format dengan note (tanpa expiration)
+                local user, key, foundNote = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Note:%s*(.+)")
+                if user and key and foundNote then
                     if string.lower(user) == string.lower(currentUsername) 
                        and string.upper(key) == enteredKey then
                         isValid = true
                         isPremium = true
-                        expirationDate = exp
-                        isExpired = IsKeyExpired(exp)
+                        note = foundNote
+                        isExpired = false -- Key dengan note tidak pernah expired
                         break
+                    end
+                else
+                    -- Pattern untuk format dengan expiration (tanpa note)
+                    user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
+                    if user and key and exp then
+                        if string.lower(user) == string.lower(currentUsername) 
+                           and string.upper(key) == enteredKey then
+                            isValid = true
+                            isPremium = true
+                            expirationDate = exp
+                            isExpired = IsKeyExpired(exp)
+                            break
+                        end
                     end
                 end
             end
@@ -538,60 +699,74 @@ local function CreateMainGUI()
                 else
                     StatusLabel.Text = ""
                     
-                    CreateConfirmationDialog(
-                        "PREMIUM SCRIPT", 
-                        "Are you sure you want to load the premium script?\nExpires: "..expirationDate,
-                        function(confirmed)
-                            if confirmed then
-                                -- Loading animation
-                                local LoadingFrame = Instance.new("Frame")
-                                LoadingFrame.Name = "LoadingFrame"
-                                LoadingFrame.Parent = MainFrame
-                                LoadingFrame.BackgroundColor3 = darkestPanel
-                                LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
-                                LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
-                                LoadingFrame.AnchorPoint = Vector2.new(0, 1)
-                                
-                                local LoadingBar = Instance.new("Frame")
-                                LoadingBar.Name = "LoadingBar"
-                                LoadingBar.Parent = LoadingFrame
-                                LoadingBar.BackgroundColor3 = accentColor
-                                LoadingBar.Size = UDim2.new(0, 0, 1, 0)
-
-                                local LoadingText = Instance.new("TextLabel")
-                                LoadingText.Name = "LoadingText"
-                                LoadingText.Parent = LoadingFrame
-                                LoadingText.BackgroundTransparency = 1
-                                LoadingText.Size = UDim2.new(1, 0, 1, 0)
-                                LoadingText.Font = Enum.Font.GothamBold
-                                LoadingText.Text = "LOADING PREMIUM: 0%"
-                                LoadingText.TextColor3 = textColor
-                                LoadingText.TextSize = 14
-
-                                local duration = 5
-                                local startTime = tick()
-                                
-                                local function update()
-                                    local elapsed = tick() - startTime
-                                    local progress = math.min(elapsed/duration, 1)
+                    if note ~= "" then
+                        -- Tampilkan note full-screen dan tidak load script
+                        ShowFullScreenNote(note)
+                        
+                        -- Kembalikan ke menu utama setelah 5 detik
+                        task.delay(5, function()
+                            LicenseFrame:Destroy()
+                            Title.Text = "ALADIA SCRIPT LOADER"
+                            PremiumButton.Visible = true
+                            BasicButton.Visible = true
+                        end)
+                    else
+                        -- Jika tidak ada note, tampilkan konfirmasi dengan expiration date
+                        CreateConfirmationDialog(
+                            "PREMIUM SCRIPT", 
+                            "Are you sure you want to load the premium script?\nExpires: "..expirationDate,
+                            function(confirmed)
+                                if confirmed then
+                                    -- Loading animation
+                                    local LoadingFrame = Instance.new("Frame")
+                                    LoadingFrame.Name = "LoadingFrame"
+                                    LoadingFrame.Parent = MainFrame
+                                    LoadingFrame.BackgroundColor3 = darkestPanel
+                                    LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
+                                    LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
+                                    LoadingFrame.AnchorPoint = Vector2.new(0, 1)
                                     
-                                    LoadingBar.Size = UDim2.new(progress, 0, 1, 0)
-                                    LoadingText.Text = "LOADING PREMIUM: "..math.floor(progress*100).."%"
+                                    local LoadingBar = Instance.new("Frame")
+                                    LoadingBar.Name = "LoadingBar"
+                                    LoadingBar.Parent = LoadingFrame
+                                    LoadingBar.BackgroundColor3 = accentColor
+                                    LoadingBar.Size = UDim2.new(0, 0, 1, 0)
+
+                                    local LoadingText = Instance.new("TextLabel")
+                                    LoadingText.Name = "LoadingText"
+                                    LoadingText.Parent = LoadingFrame
+                                    LoadingText.BackgroundTransparency = 1
+                                    LoadingText.Size = UDim2.new(1, 0, 1, 0)
+                                    LoadingText.Font = Enum.Font.GothamBold
+                                    LoadingText.Text = "LOADING PREMIUM: 0%"
+                                    LoadingText.TextColor3 = textColor
+                                    LoadingText.TextSize = 14
+
+                                    local duration = 5
+                                    local startTime = tick()
                                     
-                                    if progress < 1 then
-                                        task.wait()
-                                        update()
-                                    else
-                                        task.wait(0.5)
-                                        ScreenGui:Destroy()
-                                        loadstring(game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvpa/refs/heads/main/vipa.lua"))()
+                                    local function update()
+                                        local elapsed = tick() - startTime
+                                        local progress = math.min(elapsed/duration, 1)
+                                        
+                                        LoadingBar.Size = UDim2.new(progress, 0, 1, 0)
+                                        LoadingText.Text = "LOADING PREMIUM: "..math.floor(progress*100).."%"
+                                        
+                                        if progress < 1 then
+                                            task.wait()
+                                            update()
+                                        else
+                                            task.wait(0.5)
+                                            ScreenGui:Destroy()
+                                            loadstring(game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvpa/refs/heads/main/vipa.lua"))()
+                                        end
                                     end
+                                    
+                                    update()
                                 end
-                                
-                                update()
                             end
-                        end
-                    )
+                        )
+                    end
                 end
             else
                 StatusLabel.Text = "INVALID LICENSE KEY"
@@ -683,13 +858,13 @@ if not success then
     local ErrorTitle = Instance.new("TextLabel")
     ErrorTitle.Text = "LOADER ERROR"
     ErrorTitle.Font = Enum.Font.GothamBold
-    ErrorTitle.TextColor3 = errorRed
+    ErrorTitle.TextColor3 = Color3.fromRGB(150, 50, 50)
     ErrorTitle.Size = UDim2.new(1, 0, 0, 40)
     ErrorTitle.Parent = ErrorFrame
     
     local ErrorMsg = Instance.new("TextLabel")
     ErrorMsg.Text = "Failed to initialize loader:\n"..tostring(err)
-    ErrorMsg.TextColor3 = textColor
+    ErrorMsg.TextColor3 = Color3.fromRGB(220, 220, 220)
     ErrorMsg.Size = UDim2.new(1, -20, 1, -60)
     ErrorMsg.Position = UDim2.new(0, 10, 0, 50)
     ErrorMsg.TextWrapped = true
