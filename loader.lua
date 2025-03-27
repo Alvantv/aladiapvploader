@@ -749,7 +749,7 @@ local function CreateMainGUI()
                                     LoadingText.TextColor3 = textColor
                                     LoadingText.TextSize = 14
 
-                                    local duration = 5
+                                    local duration = 1
                                     local startTime = tick()
                                     
                                     local function update()
