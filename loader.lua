@@ -5,6 +5,7 @@
   - Modern dark theme
   - Confirmation dialogs
   - Loading animations
+  - Anti-spam buttons
 ]]
 
 local function CreateMainGUI()
@@ -626,24 +627,27 @@ local function CreateMainGUI()
         BackButton.TextSize = 16
         BackButton.AutoButtonColor = false
         
-        -- Back Button Functionality
-        BackButton.MouseButton1Click:Connect(function()
-            PlayClickSound()
-            LicenseFrame:Destroy()
-            Title.Text = "ALADIA SCRIPT LOADER"
-            PremiumButton.Visible = true
-            BasicButton.Visible = true
-        end)
+        -- Anti-spam variables
+        local isVerifying = false
         
         -- Verify Functionality
         VerifyButton.MouseButton1Click:Connect(function()
+            if isVerifying then return end
+            isVerifying = true
             PlayClickSound()
+            
+            -- Update button appearance
+            VerifyButton.Text = "VERIFYING..."
+            VerifyButton.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             
             local enteredKey = KeyInput.Text
             enteredKey = string.upper(enteredKey:gsub("%s+", ""))
             
             if enteredKey == "" then
                 StatusLabel.Text = "PLEASE ENTER A VALID KEY"
+                isVerifying = false
+                VerifyButton.Text = "VERIFY KEY"
+                VerifyButton.BackgroundColor3 = darkestPanel
                 return
             end
 
@@ -654,6 +658,9 @@ local function CreateMainGUI()
             
             if not success then
                 StatusLabel.Text = "CONNECTION ERROR"
+                isVerifying = false
+                VerifyButton.Text = "VERIFY KEY"
+                VerifyButton.BackgroundColor3 = darkestPanel
                 return
             end
 
@@ -772,17 +779,37 @@ local function CreateMainGUI()
                 StatusLabel.Text = "INVALID LICENSE KEY"
                 StatusLabel.TextColor3 = errorRed
             end
+            
+            -- Reset button state
+            isVerifying = false
+            VerifyButton.Text = "VERIFY KEY"
+            VerifyButton.BackgroundColor3 = darkestPanel
+        end)
+        
+        -- Back Button Functionality
+        BackButton.MouseButton1Click:Connect(function()
+            PlayClickSound()
+            LicenseFrame:Destroy()
+            Title.Text = "ALADIA SCRIPT LOADER"
+            PremiumButton.Visible = true
+            BasicButton.Visible = true
         end)
     end)
 
     -- Basic Button Functionality
+    local isConfirming = false
+    
     BasicButton.MouseButton1Click:Connect(function()
+        if isConfirming then return end
+        isConfirming = true
         PlayClickSound()
         
         CreateConfirmationDialog(
             "BASIC SCRIPT", 
             "Are you sure you want to load the basic script?",
             function(confirmed)
+                isConfirming = false -- Reset state setelah konfirmasi selesai
+                
                 if confirmed then
                     PremiumButton.Visible = false
                     BasicButton.Visible = false
