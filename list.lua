@@ -20,3 +20,19 @@ Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
 
 -- Blacklist
 Usn: DODIKANJUTT | Blacklist: true
+
+-- Blacklist (Admin Ingame)
+Usn: niohailhad | Blacklist: true
+Usn: Emceeee0 | Blacklist: true
+Usn: dizon_3490 | Blacklist: true
+Usn: vj101yt | Blacklist: true
+Usn: MrDash_68 | Blacklist: true
+Usn: IInsaneStorage | Blacklist: true
+Usn: yuhanforyoupls | Blacklist: true
+Usn: kyrziis | Blacklist: true
+Usn: KingSnoopJay | Blacklist: true
+Usn: Nel_cookie | Blacklist: true
+Usn: todoroki_kudo | Blacklist: true
+Usn: DuminuStudio | Blacklist: true
+Usn: todoroki_kudo | Blacklist: true
+Usn: xxrosero09 | Blacklist: true
