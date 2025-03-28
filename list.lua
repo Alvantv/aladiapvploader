@@ -16,4 +16,3 @@ Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: SEKARANG SIRKEL YE
 
 -- Blacklist
 Usn: DODIKANJUTT | Blacklist: true
-Usn: Henclin | Blacklist: true
