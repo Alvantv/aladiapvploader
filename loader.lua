@@ -653,7 +653,7 @@ local function CreateMainGUI()
 
             -- Get whitelist from Pastebin
             local success, whitelist = pcall(function()
-                return game:HttpGet("https://pastebin.com/raw/DxMGTLAn")
+                return game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvploader/refs/heads/main/list.lua")
             end)
             
             if not success then
