@@ -6,6 +6,8 @@
   - Confirmation dialogs
   - Loading animations
   - Anti-spam buttons
+  - GitHub whitelist integration
+  - Blacklist system
 ]]
 
 local function CreateMainGUI()
@@ -36,6 +38,46 @@ local function CreateMainGUI()
         return
     end
 
+    -- Current Username
+    local currentUsername = game.Players.LocalPlayer.Name
+
+    -- Function to check if user is blacklisted
+    local function IsUserBlacklisted()
+        local success, whitelist = pcall(function()
+            local response = game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvploader/refs/heads/main/list.lua", true)
+            
+            if not response or type(response) ~= "string" or response:len() < 5 then
+                error("Invalid whitelist response")
+            end
+            
+            if response:find("<html") or response:find("<!DOCTYPE") then
+                error("Whitelist not found")
+            end
+            
+            return response
+        end)
+
+        if not success then
+            warn("[ALADIA LOADER] Whitelist fetch error: "..tostring(whitelist))
+            return false
+        end
+
+        -- Check for blacklist entry
+        for line in whitelist:gmatch("[^\r\n]+") do
+            local user, blacklistStatus = line:match("Usn:%s*(.-)%s*|%s*Blacklist:%s*(%S+)")
+            if user and blacklistStatus then
+                if string.lower(user) == string.lower(currentUsername) and string.lower(blacklistStatus) == "true" then
+                    return true
+                end
+            end
+        end
+        
+        return false
+    end
+
+    -- Check blacklist status
+    local isBlacklisted = IsUserBlacklisted()
+
     -- Main container
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
@@ -65,18 +107,30 @@ local function CreateMainGUI()
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
 
-    -- Menu button
-    local MenuButton = Instance.new("ImageButton")
-    MenuButton.Name = "MenuButton"
-    MenuButton.Parent = MainFrame
-    MenuButton.BackgroundTransparency = 1
-    MenuButton.Size = UDim2.new(0, 30, 0, 30)
-    MenuButton.Position = UDim2.new(1, -35, 1, -35)
-    MenuButton.Image = "rbxassetid://3926305904"
-    MenuButton.ImageRectOffset = Vector2.new(164, 364)
-    MenuButton.ImageRectSize = Vector2.new(36, 36)
-    MenuButton.ImageColor3 = Color3.fromRGB(100, 100, 100)
-    MenuButton.ZIndex = 2
+    -- Header
+    local Header = Instance.new("Frame")
+    Header.Name = "Header"
+    Header.Parent = MainFrame
+    Header.BackgroundColor3 = darkestPanel
+    Header.BorderSizePixel = 0
+    Header.Size = UDim2.new(1, 0, 0, 50)
+    
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 8)
+    HeaderCorner.Parent = Header
+
+    -- Title
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Parent = Header
+    Title.BackgroundTransparency = 1
+    Title.Size = UDim2.new(1, -40, 1, 0)
+    Title.Position = UDim2.new(0, 20, 0, 0)
+    Title.Font = Enum.Font.GothamBold
+    Title.Text = "KemilingHUB | Aladia"
+    Title.TextColor3 = textColor
+    Title.TextSize = 18
+    Title.TextXAlignment = Enum.TextXAlignment.Left
 
     -- Notification function
     local function ShowNotification(message, color)
@@ -108,7 +162,6 @@ local function CreateMainGUI()
         NotifText.TextColor3 = textColor
         NotifText.TextSize = 14
         
-        -- Animate notification
         game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.3), {
             Position = UDim2.new(0.5, -125, 1, -70)
         }):Play()
@@ -123,36 +176,67 @@ local function CreateMainGUI()
         Notification:Destroy()
     end
 
-    -- Menu button functionality
+    -- Menu button
+    local MenuButton = Instance.new("ImageButton")
+    MenuButton.Name = "MenuButton"
+    MenuButton.Parent = MainFrame
+    MenuButton.BackgroundTransparency = 1
+    MenuButton.Size = UDim2.new(0, 30, 0, 30)
+    MenuButton.Position = UDim2.new(1, -35, 1, -35)
+    MenuButton.Image = "rbxassetid://3926305904"
+    MenuButton.ImageRectOffset = Vector2.new(164, 364)
+    MenuButton.ImageRectSize = Vector2.new(36, 36)
+    MenuButton.ImageColor3 = Color3.fromRGB(100, 100, 100)
+    MenuButton.ZIndex = 2
+
     MenuButton.MouseButton1Click:Connect(function()
         setclipboard("https://dsc.gg/kemilinghub")
         ShowNotification("Discord Link Copied!", accentColor)
     end)
 
-    -- Header
-    local Header = Instance.new("Frame")
-    Header.Name = "Header"
-    Header.Parent = MainFrame
-    Header.BackgroundColor3 = darkestPanel
-    Header.BorderSizePixel = 0
-    Header.Size = UDim2.new(1, 0, 0, 50)
-    
-    local HeaderCorner = Instance.new("UICorner")
-    HeaderCorner.CornerRadius = UDim.new(0, 8)
-    HeaderCorner.Parent = Header
+    -- If user is blacklisted, show message and return
+    if isBlacklisted then
 
-    -- Title
-    local Title = Instance.new("TextLabel")
-    Title.Name = "Title"
-    Title.Parent = Header
-    Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(1, -40, 1, 0)
-    Title.Position = UDim2.new(0, 20, 0, 0)
-    Title.Font = Enum.Font.GothamBold
-    Title.Text = "ALADIA SCRIPT LOADER"
-    Title.TextColor3 = textColor
-    Title.TextSize = 18
-    Title.TextXAlignment = Enum.TextXAlignment.Left
+        -- Warning text
+        local WarningText = Instance.new("TextLabel")
+        WarningText.Name = "WarningText"
+        WarningText.Parent = MainFrame
+        WarningText.BackgroundTransparency = 1
+        WarningText.Size = UDim2.new(1, -40, 0, 40)
+        WarningText.Position = UDim2.new(0, 20, 0.24, 0)
+        WarningText.Font = Enum.Font.GothamBold
+        WarningText.Text = "⚠ WARNING ⚠"
+        WarningText.TextColor3 = warningRed
+        WarningText.TextSize = 24
+        WarningText.TextWrapped = true
+
+        local BlacklistMessage = Instance.new("TextLabel")
+        BlacklistMessage.Name = "BlacklistMessage"
+        BlacklistMessage.Parent = MainFrame
+        BlacklistMessage.BackgroundTransparency = 1
+        BlacklistMessage.Size = UDim2.new(1, -40, 0.6, 0)
+        BlacklistMessage.Position = UDim2.new(0, 20, 0.26, 0)
+        BlacklistMessage.Font = Enum.Font.GothamBold
+        BlacklistMessage.Text = "AKUN KAMU TELAH DI BLACKLIST"
+        BlacklistMessage.TextColor3 = warningRed
+        BlacklistMessage.TextSize = 24
+        BlacklistMessage.TextWrapped = true
+
+        local BlacklistMessage = Instance.new("TextLabel")
+        BlacklistMessage.Name = "BlacklistMessage"
+        BlacklistMessage.Parent = MainFrame
+        BlacklistMessage.BackgroundTransparency = 1
+        BlacklistMessage.Size = UDim2.new(1, -40, 0.6, 0)
+        BlacklistMessage.Position = UDim2.new(0.10, 20, 0.63, 0)
+        BlacklistMessage.Font = Enum.Font.GothamBold
+        BlacklistMessage.Text = "Req Unblacklist di sini -->"
+        BlacklistMessage.TextColor3 = textColor
+        BlacklistMessage.TextSize = 18
+        BlacklistMessage.TextWrapped = true
+        
+        -- Disable all functionality
+        return
+    end
 
     -- Premium Button
     local PremiumButton = Instance.new("TextButton")
@@ -263,9 +347,8 @@ local function CreateMainGUI()
         end
     end
 
-    -- Full-screen note display (FULL SCREEN VERSION)
+    -- Full-screen note display
     local function ShowFullScreenNote(message)
-        -- Create overlay
         local NoteOverlay = Instance.new("Frame")
         NoteOverlay.Name = "NoteOverlay"
         NoteOverlay.Parent = ScreenGui
@@ -273,7 +356,6 @@ local function CreateMainGUI()
         NoteOverlay.Size = UDim2.new(1, 0, 1, 0)
         NoteOverlay.ZIndex = 50
         
-        -- Main container (full screen with padding)
         local NoteContainer = Instance.new("Frame")
         NoteContainer.Name = "NoteContainer"
         NoteContainer.Parent = NoteOverlay
@@ -287,7 +369,6 @@ local function CreateMainGUI()
         UICorner.CornerRadius = UDim.new(0, 8)
         UICorner.Parent = NoteContainer
         
-        -- Title bar
         local TitleBar = Instance.new("Frame")
         TitleBar.Name = "TitleBar"
         TitleBar.Parent = NoteContainer
@@ -302,45 +383,42 @@ local function CreateMainGUI()
         Title.Size = UDim2.new(1, -40, 1, 0)
         Title.Position = UDim2.new(0, 20, 0, 0)
         Title.Font = Enum.Font.GothamBold
-        Title.Text = "DEVELOPER MESSAGE | KemilingHUB"
+        Title.Text = "ALADIA SCRIPT NOTIFICATION"
         Title.TextColor3 = warningYellow
         Title.TextSize = 24
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.ZIndex = 52
         
-        -- Warning text
         local WarningText = Instance.new("TextLabel")
         WarningText.Name = "WarningText"
         WarningText.Parent = NoteContainer
         WarningText.BackgroundTransparency = 1
-        WarningText.Size = UDim2.new(1, -40, 0, 40)  -- Increased height for better visibility
-        WarningText.Position = UDim2.new(0, 20, 0.2, 50)  -- Positioned above the scroll frame
+        WarningText.Size = UDim2.new(1, -40, 0, 40)
+        WarningText.Position = UDim2.new(0, 20, 0.2, 50)
         WarningText.Font = Enum.Font.GothamBold
         WarningText.Text = "⚠ WARNING ⚠"
         WarningText.TextColor3 = warningRed
-        WarningText.TextSize = 44  -- Larger text size
+        WarningText.TextSize = 44
         WarningText.ZIndex = 52
-        WarningText.TextYAlignment = Enum.TextYAlignment.Bottom  -- Align text to bottom of the label
+        WarningText.TextYAlignment = Enum.TextYAlignment.Bottom
 
-        -- Message area (scrolling)
         local ScrollFrame = Instance.new("ScrollingFrame")
         ScrollFrame.Name = "ScrollFrame"
         ScrollFrame.Parent = NoteContainer
         ScrollFrame.BackgroundTransparency = 1
         ScrollFrame.Size = UDim2.new(1, -40, 0.6, 0)
-        ScrollFrame.Position = UDim2.new(0, 20, 0.5, 0)  -- Adjusted position to be below warning text
+        ScrollFrame.Position = UDim2.new(0, 20, 0.5, 0)
         ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
         ScrollFrame.ScrollBarThickness = 8
         ScrollFrame.ZIndex = 52
-        ScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y  -- Ensure vertical scrolling only
+        ScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y
         
-        -- Message text (centered and full width)
         local MessageText = Instance.new("TextLabel")
         MessageText.Name = "MessageText"
         MessageText.Parent = ScrollFrame
         MessageText.BackgroundTransparency = 1
         MessageText.Size = UDim2.new(1, 0, 0, 0)
-        MessageText.Font = Enum.Font.GothamBold  -- Changed to bold font
+        MessageText.Font = Enum.Font.GothamBold
         MessageText.Text = message
         MessageText.TextColor3 = textColor
         MessageText.TextSize = 20
@@ -354,7 +432,6 @@ local function CreateMainGUI()
             ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, MessageText.TextBounds.Y + 20)
         end)
         
-        -- Close button (large and centered)
         local CloseButton = Instance.new("TextButton")
         CloseButton.Name = "CloseButton"
         CloseButton.Parent = NoteContainer
@@ -372,7 +449,6 @@ local function CreateMainGUI()
         UICorner2.CornerRadius = UDim.new(0, 6)
         UICorner2.Parent = CloseButton
         
-        -- Button hover effects
         CloseButton.MouseEnter:Connect(function()
             game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
                 BackgroundColor3 = buttonHover
@@ -385,7 +461,6 @@ local function CreateMainGUI()
             }):Play()
         end)
         
-        -- Button functionality
         CloseButton.MouseButton1Click:Connect(function()
             PlayClickSound()
             game:GetService("TweenService"):Create(NoteOverlay, TweenInfo.new(0.3), {
@@ -395,7 +470,6 @@ local function CreateMainGUI()
             NoteOverlay:Destroy()
         end)
         
-        -- Animate in (full screen)
         NoteOverlay.BackgroundTransparency = 1
         NoteContainer.Size = UDim2.new(0, 0, 0, 0)
         NoteContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -412,7 +486,6 @@ local function CreateMainGUI()
 
     -- Confirmation dialog
     local function CreateConfirmationDialog(title, message, confirmCallback)
-        -- Create overlay
         local Overlay = Instance.new("Frame")
         Overlay.Name = "ConfirmationOverlay"
         Overlay.Parent = ScreenGui
@@ -421,7 +494,6 @@ local function CreateMainGUI()
         Overlay.Size = UDim2.new(1, 0, 1, 0)
         Overlay.ZIndex = 10
         
-        -- Dialog frame
         local DialogFrame = Instance.new("Frame")
         DialogFrame.Name = "DialogFrame"
         DialogFrame.Parent = Overlay
@@ -435,7 +507,6 @@ local function CreateMainGUI()
         UICorner.CornerRadius = UDim.new(0, 8)
         UICorner.Parent = DialogFrame
         
-        -- Title
         local DialogTitle = Instance.new("TextLabel")
         DialogTitle.Name = "DialogTitle"
         DialogTitle.Parent = DialogFrame
@@ -449,7 +520,6 @@ local function CreateMainGUI()
         DialogTitle.TextXAlignment = Enum.TextXAlignment.Left
         DialogTitle.ZIndex = 12
         
-        -- Message
         local DialogMessage = Instance.new("TextLabel")
         DialogMessage.Name = "DialogMessage"
         DialogMessage.Parent = DialogFrame
@@ -463,7 +533,6 @@ local function CreateMainGUI()
         DialogMessage.TextWrapped = true
         DialogMessage.ZIndex = 12
         
-        -- Buttons
         local ButtonContainer = Instance.new("Frame")
         ButtonContainer.Name = "ButtonContainer"
         ButtonContainer.Parent = DialogFrame
@@ -498,7 +567,6 @@ local function CreateMainGUI()
         YesButton.AutoButtonColor = false
         YesButton.ZIndex = 13
         
-        -- Button functionality
         local function CloseDialog()
             game:GetService("TweenService"):Create(DialogFrame, TweenInfo.new(0.2), {
                 Size = UDim2.new(0, 0, 0, 0),
@@ -525,7 +593,6 @@ local function CreateMainGUI()
             confirmCallback(false)
         end)
         
-        -- Animate in
         DialogFrame.Size = UDim2.new(0, 0, 0, 0)
         DialogFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         
@@ -537,16 +604,16 @@ local function CreateMainGUI()
 
     -- Premium Button Functionality
     PremiumButton.MouseButton1Click:Connect(function()
-        PlayClickSound()
+        if IsUserBlacklisted() then
+            ShowFullScreenNote("KAMU TELAH DI BLACKLIST")
+            return
+        end
         
-        -- Hide main buttons
+        PlayClickSound()
         PremiumButton.Visible = false
         BasicButton.Visible = false
-        
-        -- Change title
         Title.Text = "ENTER LICENSE KEY"
         
-        -- License Frame
         local LicenseFrame = Instance.new("Frame")
         LicenseFrame.Name = "LicenseFrame"
         LicenseFrame.Parent = MainFrame
@@ -554,8 +621,6 @@ local function CreateMainGUI()
         LicenseFrame.Size = UDim2.new(1, 0, 1, -50)
         LicenseFrame.Position = UDim2.new(0, 0, 0, 50)
         
-        -- Current Username
-        local currentUsername = game.Players.LocalPlayer.Name
         local UsernameLabel = Instance.new("TextLabel")
         UsernameLabel.Name = "UsernameLabel"
         UsernameLabel.Parent = LicenseFrame
@@ -568,7 +633,6 @@ local function CreateMainGUI()
         UsernameLabel.TextSize = 14
         UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
         
-        -- Status Label
         local StatusLabel = Instance.new("TextLabel")
         StatusLabel.Name = "StatusLabel"
         StatusLabel.Parent = LicenseFrame
@@ -581,7 +645,6 @@ local function CreateMainGUI()
         StatusLabel.TextSize = 14
         StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
         
-        -- Key Input
         local KeyInputContainer = Instance.new("Frame")
         KeyInputContainer.Name = "KeyInputContainer"
         KeyInputContainer.Parent = LicenseFrame
@@ -601,7 +664,6 @@ local function CreateMainGUI()
         KeyInput.TextColor3 = textColor
         KeyInput.TextSize = 14
         
-        -- Verify Button
         local VerifyButton = Instance.new("TextButton")
         VerifyButton.Name = "VerifyButton"
         VerifyButton.Parent = LicenseFrame
@@ -614,7 +676,6 @@ local function CreateMainGUI()
         VerifyButton.TextSize = 16
         VerifyButton.AutoButtonColor = false
         
-        -- Back Button
         local BackButton = Instance.new("TextButton")
         BackButton.Name = "BackButton"
         BackButton.Parent = LicenseFrame
@@ -627,16 +688,13 @@ local function CreateMainGUI()
         BackButton.TextSize = 16
         BackButton.AutoButtonColor = false
         
-        -- Anti-spam variables
         local isVerifying = false
         
-        -- Verify Functionality
         VerifyButton.MouseButton1Click:Connect(function()
             if isVerifying then return end
             isVerifying = true
             PlayClickSound()
             
-            -- Update button appearance
             VerifyButton.Text = "VERIFYING..."
             VerifyButton.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             
@@ -651,20 +709,30 @@ local function CreateMainGUI()
                 return
             end
 
-            -- Get whitelist from Pastebin
             local success, whitelist = pcall(function()
-                return game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvploader/refs/heads/main/list.lua")
+                local response = game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvploader/refs/heads/main/list.lua", true)
+                
+                if not response or type(response) ~= "string" or response:len() < 5 then
+                    error("Invalid whitelist response")
+                end
+                
+                if response:find("<html") or response:find("<!DOCTYPE") then
+                    error("Whitelist not found")
+                end
+                
+                return response
             end)
             
             if not success then
-                StatusLabel.Text = "CONNECTION ERROR"
+                StatusLabel.Text = "FAILED TO LOAD WHITELIST"
+                StatusLabel.TextColor3 = errorRed
                 isVerifying = false
                 VerifyButton.Text = "VERIFY KEY"
                 VerifyButton.BackgroundColor3 = darkestPanel
+                warn("[ALADIA LOADER] Whitelist fetch error: "..tostring(whitelist))
                 return
             end
 
-            -- Check verification
             local isValid = false
             local isPremium = false
             local isExpired = false
@@ -672,7 +740,6 @@ local function CreateMainGUI()
             local note = ""
             
             for line in whitelist:gmatch("[^\r\n]+") do
-                -- Pattern untuk format dengan note (tanpa expiration)
                 local user, key, foundNote = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Note:%s*(.+)")
                 if user and key and foundNote then
                     if string.lower(user) == string.lower(currentUsername) 
@@ -680,12 +747,11 @@ local function CreateMainGUI()
                         isValid = true
                         isPremium = true
                         note = foundNote
-                        isExpired = false -- Key dengan note tidak pernah expired
+                        isExpired = false
                         break
                     end
                 else
-                    -- Pattern untuk format dengan expiration (tanpa note)
-                    user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
+                    local user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
                     if user and key and exp then
                         if string.lower(user) == string.lower(currentUsername) 
                            and string.upper(key) == enteredKey then
@@ -707,24 +773,20 @@ local function CreateMainGUI()
                     StatusLabel.Text = ""
                     
                     if note ~= "" then
-                        -- Tampilkan note full-screen dan tidak load script
                         ShowFullScreenNote(note)
                         
-                        -- Kembalikan ke menu utama setelah 5 detik
                         task.delay(5, function()
                             LicenseFrame:Destroy()
-                            Title.Text = "ALADIA SCRIPT LOADER"
+                            Title.Text = "KemilingHUB | Aladia"
                             PremiumButton.Visible = true
                             BasicButton.Visible = true
                         end)
                     else
-                        -- Jika tidak ada note, tampilkan konfirmasi dengan expiration date
                         CreateConfirmationDialog(
                             "PREMIUM SCRIPT", 
                             "Are you sure you want to load the premium script?\nExpires: "..expirationDate,
                             function(confirmed)
                                 if confirmed then
-                                    -- Loading animation
                                     local LoadingFrame = Instance.new("Frame")
                                     LoadingFrame.Name = "LoadingFrame"
                                     LoadingFrame.Parent = MainFrame
@@ -790,7 +852,7 @@ local function CreateMainGUI()
         BackButton.MouseButton1Click:Connect(function()
             PlayClickSound()
             LicenseFrame:Destroy()
-            Title.Text = "ALADIA SCRIPT LOADER"
+            Title.Text = "KemilngHUB | Aladia"
             PremiumButton.Visible = true
             BasicButton.Visible = true
         end)
