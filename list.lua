@@ -1,4 +1,5 @@
 -- Admin
+Usn: Henclin | Key: 1111 | Exp: 01/01/3000
 Usn: KemilingHUB2 | Key: 1111 | Exp: 01/01/3000
 Usn: Janggaliwir | Key: 1111 | Exp: 01/01/3000
 
@@ -13,7 +14,6 @@ Usn: sevshtz | Key: 3TXdVbHYa | Exp: 29/03/2025 20:59
 
 -- Nbuy User
 Usn: UsernameHere | Nbuy: true | Note: (Optional)
-Usn: Henclin | Nbuy: true
 
 -- Note User
 Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
