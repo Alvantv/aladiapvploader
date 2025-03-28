@@ -1,5 +1,4 @@
 -- Admin
-Usn: Henclin | Key: 1111 | Exp: 01/01/3000
 Usn: KemilingHUB2 | Key: 1111 | Exp: 01/01/3000
 Usn: Janggaliwir | Key: 1111 | Exp: 01/01/3000
 
@@ -16,3 +15,4 @@ Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: SEKARANG SIRKEL YE
 
 -- Blacklist
 Usn: DODIKANJUTT | Blacklist: true
+Usn: Henclin | Blacklist: true
