@@ -15,4 +15,4 @@ Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
 
 -- Blacklist
 Usn: DODIKANJUTT | Blacklist: true
-Usn: Henclin | Blacklist: true | Nbuy: True"
+Usn: Henclin | Blacklist: true | Nbuy: True
