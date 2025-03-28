@@ -265,59 +265,6 @@ local function CreateMainGUI()
         return
     end
 
-    -- If user needs to purchase, show message
-    if userStatus.needsPurchase then
-        local PurchaseFrame = Instance.new("Frame")
-        PurchaseFrame.Name = "PurchaseFrame"
-        PurchaseFrame.Parent = MainFrame
-        PurchaseFrame.BackgroundTransparency = 1
-        PurchaseFrame.Size = UDim2.new(1, 0, 1, 0)
-        
-        local WarningText = Instance.new("TextLabel")
-        WarningText.Name = "WarningText"
-        WarningText.Parent = PurchaseFrame
-        WarningText.BackgroundTransparency = 1
-        WarningText.Size = UDim2.new(1, -40, 0, 40)
-        WarningText.Position = UDim2.new(0, 20, 0.24, 0)
-        WarningText.Font = Enum.Font.GothamBold
-        WarningText.Text = "⚠ PURCHASE REQUIRED ⚠"
-        WarningText.TextColor3 = warningYellow
-        WarningText.TextSize = 20
-        WarningText.TextWrapped = true
-
-        local PurchaseMessage = Instance.new("TextLabel")
-        PurchaseMessage.Name = "PurchaseMessage"
-        PurchaseMessage.Parent = PurchaseFrame
-        PurchaseMessage.BackgroundTransparency = 1
-        PurchaseMessage.Size = UDim2.new(1, -40, 0.6, 0)
-        PurchaseMessage.Position = UDim2.new(0, 20, 0.23, 0)
-        PurchaseMessage.Font = Enum.Font.GothamBold
-        PurchaseMessage.Text = "You need to purchase access (40k/week) to continue using this cheat"
-        PurchaseMessage.TextColor3 = textColor
-        PurchaseMessage.TextSize = 16
-        PurchaseMessage.TextWrapped = true
-        
-        -- Add contact information or purchase button here if needed
-        local ContactButton = Instance.new("TextButton")
-        ContactButton.Name = "ContactButton"
-        ContactButton.Parent = PurchaseFrame
-        ContactButton.BackgroundColor3 = darkestPanel
-        ContactButton.Position = UDim2.new(0.5, -100, 0.7, 0)
-        ContactButton.Size = UDim2.new(0, 200, 0, 40)
-        ContactButton.Font = Enum.Font.GothamBold
-        ContactButton.Text = "CONTACT US"
-        ContactButton.TextColor3 = textColor
-        ContactButton.TextSize = 14
-        ContactButton.AutoButtonColor = false
-        
-        ContactButton.MouseButton1Click:Connect(function()
-            setclipboard("https://dsc.gg/kemilinghub")
-            ShowNotification("Discord link copied!", accentColor)
-        end)
-        
-        return
-    end
-
     -- Premium Button
     local PremiumButton = Instance.new("TextButton")
     PremiumButton.Name = "PremiumButton"
@@ -935,12 +882,81 @@ local function CreateMainGUI()
 
     -- Basic Button Functionality
     local isConfirming = false
-    
+
     BasicButton.MouseButton1Click:Connect(function()
         if isConfirming then return end
         isConfirming = true
         PlayClickSound()
+    
+        -- If user needs to purchase (Nbuy:true)
+        if userStatus.needsPurchase then
+            -- Clear the main display
+            PremiumButton.Visible = false
+            BasicButton.Visible = false
+            Title.Text = ""
         
+            -- Create a blank frame that will contain ALL elements
+            local BlankFrame = Instance.new("Frame")
+            BlankFrame.Name = "BlankFrame"
+            BlankFrame.Parent = MainFrame
+            BlankFrame.BackgroundTransparency = 1
+            BlankFrame.Size = UDim2.new(1, 0, 1, -50)
+            BlankFrame.Position = UDim2.new(0, 0, 0, 50)
+        
+            -- Add the warning text INSIDE BlankFrame
+            local WarningText = Instance.new("TextLabel")
+            WarningText.Name = "WarningText"
+            WarningText.Parent = BlankFrame
+            WarningText.BackgroundTransparency = 1
+            WarningText.Size = UDim2.new(1, -40, 0, 40)
+            WarningText.Position = UDim2.new(0, 20, 0.2, -30)
+            WarningText.Font = Enum.Font.GothamBold
+            WarningText.Text = "⚠ WARNING ⚠"
+            WarningText.TextColor3 = warningRed
+            WarningText.TextSize = 18
+            WarningText.TextWrapped = true
+            WarningText.TextXAlignment = Enum.TextXAlignment.Center
+
+            -- Add the purchase message INSIDE BlankFrame
+            local PurchaseText = Instance.new("TextLabel")
+            PurchaseText.Name = "PurchaseText"
+            PurchaseText.Parent = BlankFrame
+            PurchaseText.BackgroundTransparency = 1
+            PurchaseText.Size = UDim2.new(1, -40, 0, 60)
+            PurchaseText.Position = UDim2.new(0, 20, 0.3, 0)
+            PurchaseText.Font = Enum.Font.GothamBold
+            PurchaseText.Text = "Your free script has run out, you have to upgrade and buy a premium script at a price of (30k/day)"
+            PurchaseText.TextColor3 = warningYellow
+            PurchaseText.TextSize = 16
+            PurchaseText.TextWrapped = true
+            PurchaseText.TextXAlignment = Enum.TextXAlignment.Center
+        
+            -- Add back button INSIDE BlankFrame
+            local BackButton = Instance.new("TextButton")
+            BackButton.Name = "BackButton"
+            BackButton.Parent = BlankFrame
+            BackButton.BackgroundColor3 = darkestPanel
+            BackButton.Size = UDim2.new(0.6, 0, 0, 40)
+            BackButton.Position = UDim2.new(0.2, 0, 0.6, 0)
+            BackButton.Font = Enum.Font.GothamBold
+            BackButton.Text = "BACK"
+            BackButton.TextColor3 = textColor
+            BackButton.TextSize = 14
+            BackButton.AutoButtonColor = false
+        
+            BackButton.MouseButton1Click:Connect(function()
+                PlayClickSound()
+                BlankFrame:Destroy() -- Ini akan menghapus SEMUA anak-anaknya termasuk WarningText
+                Title.Text = "KemilingHUB | Aladia"
+                PremiumButton.Visible = true
+                BasicButton.Visible = true
+                isConfirming = false
+            end)
+        
+            return
+        end
+        
+        -- If user doesn't need to purchase (Nbuy:false)
         CreateConfirmationDialog(
             "BASIC SCRIPT", 
             "Are you sure you want to load the basic script?",
