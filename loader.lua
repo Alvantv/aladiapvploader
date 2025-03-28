@@ -8,6 +8,7 @@
   - Anti-spam buttons
   - GitHub whitelist integration
   - Blacklist system
+  - Purchase requirement check
 ]]
 
 local function CreateMainGUI()
@@ -41,8 +42,8 @@ local function CreateMainGUI()
     -- Current Username
     local currentUsername = game.Players.LocalPlayer.Name
 
-    -- Function to check if user is blacklisted
-    local function IsUserBlacklisted()
+    -- Function to check user status from GitHub
+    local function GetUserStatus()
         local success, whitelist = pcall(function()
             local response = game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvploader/refs/heads/main/list.lua", true)
             
@@ -59,24 +60,51 @@ local function CreateMainGUI()
 
         if not success then
             warn("[ALADIA LOADER] Whitelist fetch error: "..tostring(whitelist))
-            return false
+            return {
+                blacklisted = false,
+                needsPurchase = false,
+                note = ""
+            }
         end
 
-        -- Check for blacklist entry
+        local status = {
+            blacklisted = false,
+            needsPurchase = false,
+            note = ""
+        }
+        
+        -- Check for user entry
         for line in whitelist:gmatch("[^\r\n]+") do
+            -- Check for blacklist status
             local user, blacklistStatus = line:match("Usn:%s*(.-)%s*|%s*Blacklist:%s*(%S+)")
             if user and blacklistStatus then
                 if string.lower(user) == string.lower(currentUsername) and string.lower(blacklistStatus) == "true" then
-                    return true
+                    status.blacklisted = true
+                end
+            end
+            
+            -- Check for purchase requirement
+            local user, needsBuy = line:match("Usn:%s*(.-)%s*|%s*Nbuy:%s*(%S+)")
+            if user and needsBuy then
+                if string.lower(user) == string.lower(currentUsername) and string.lower(needsBuy) == "true" then
+                    status.needsPurchase = true
+                end
+            end
+            
+            -- Check for custom note
+            local user, note = line:match("Usn:%s*(.-)%s*|%s*Note:%s*(.+)")
+            if user and note then
+                if string.lower(user) == string.lower(currentUsername) then
+                    status.note = note
                 end
             end
         end
         
-        return false
+        return status
     end
 
-    -- Check blacklist status
-    local isBlacklisted = IsUserBlacklisted()
+    -- Check user status
+    local userStatus = GetUserStatus()
 
     -- Main container
     local MainFrame = Instance.new("Frame")
@@ -195,8 +223,7 @@ local function CreateMainGUI()
     end)
 
     -- If user is blacklisted, show message and return
-    if isBlacklisted then
-
+    if userStatus.blacklisted then
         -- Warning text
         local WarningText = Instance.new("TextLabel")
         WarningText.Name = "WarningText"
@@ -235,6 +262,59 @@ local function CreateMainGUI()
         BlacklistMessage.TextWrapped = true
         
         -- Disable all functionality
+        return
+    end
+
+    -- If user needs to purchase, show message
+    if userStatus.needsPurchase then
+        local PurchaseFrame = Instance.new("Frame")
+        PurchaseFrame.Name = "PurchaseFrame"
+        PurchaseFrame.Parent = MainFrame
+        PurchaseFrame.BackgroundTransparency = 1
+        PurchaseFrame.Size = UDim2.new(1, 0, 1, 0)
+        
+        local WarningText = Instance.new("TextLabel")
+        WarningText.Name = "WarningText"
+        WarningText.Parent = PurchaseFrame
+        WarningText.BackgroundTransparency = 1
+        WarningText.Size = UDim2.new(1, -40, 0, 40)
+        WarningText.Position = UDim2.new(0, 20, 0.24, 0)
+        WarningText.Font = Enum.Font.GothamBold
+        WarningText.Text = "⚠ PURCHASE REQUIRED ⚠"
+        WarningText.TextColor3 = warningYellow
+        WarningText.TextSize = 20
+        WarningText.TextWrapped = true
+
+        local PurchaseMessage = Instance.new("TextLabel")
+        PurchaseMessage.Name = "PurchaseMessage"
+        PurchaseMessage.Parent = PurchaseFrame
+        PurchaseMessage.BackgroundTransparency = 1
+        PurchaseMessage.Size = UDim2.new(1, -40, 0.6, 0)
+        PurchaseMessage.Position = UDim2.new(0, 20, 0.23, 0)
+        PurchaseMessage.Font = Enum.Font.GothamBold
+        PurchaseMessage.Text = "You need to purchase access (40k/week) to continue using this cheat"
+        PurchaseMessage.TextColor3 = textColor
+        PurchaseMessage.TextSize = 16
+        PurchaseMessage.TextWrapped = true
+        
+        -- Add contact information or purchase button here if needed
+        local ContactButton = Instance.new("TextButton")
+        ContactButton.Name = "ContactButton"
+        ContactButton.Parent = PurchaseFrame
+        ContactButton.BackgroundColor3 = darkestPanel
+        ContactButton.Position = UDim2.new(0.5, -100, 0.7, 0)
+        ContactButton.Size = UDim2.new(0, 200, 0, 40)
+        ContactButton.Font = Enum.Font.GothamBold
+        ContactButton.Text = "CONTACT US"
+        ContactButton.TextColor3 = textColor
+        ContactButton.TextSize = 14
+        ContactButton.AutoButtonColor = false
+        
+        ContactButton.MouseButton1Click:Connect(function()
+            setclipboard("https://dsc.gg/kemilinghub")
+            ShowNotification("Discord link copied!", accentColor)
+        end)
+        
         return
     end
 
@@ -604,11 +684,6 @@ local function CreateMainGUI()
 
     -- Premium Button Functionality
     PremiumButton.MouseButton1Click:Connect(function()
-        if IsUserBlacklisted() then
-            ShowFullScreenNote("KAMU TELAH DI BLACKLIST")
-            return
-        end
-        
         PlayClickSound()
         PremiumButton.Visible = false
         BasicButton.Visible = false
@@ -852,7 +927,7 @@ local function CreateMainGUI()
         BackButton.MouseButton1Click:Connect(function()
             PlayClickSound()
             LicenseFrame:Destroy()
-            Title.Text = "KemilngHUB | Aladia"
+            Title.Text = "KemilingHUB | Aladia"
             PremiumButton.Visible = true
             BasicButton.Visible = true
         end)
@@ -870,7 +945,7 @@ local function CreateMainGUI()
             "BASIC SCRIPT", 
             "Are you sure you want to load the basic script?",
             function(confirmed)
-                isConfirming = false -- Reset state setelah konfirmasi selesai
+                isConfirming = false
                 
                 if confirmed then
                     PremiumButton.Visible = false
