@@ -1,3 +1,13 @@
+--[[
+  ALADIA SCRIPT LOADER - PREMIUM VERSION
+  - Ultra-modern neomorphic design
+  - Smooth animations and transitions
+  - Dynamic color scheme
+  - Improved traffic light animation
+  - Enhanced notification system
+  - Responsive layout
+]]
+
 local function CreateMainGUI()
     -- Modern color scheme with dynamic accent
     local hour = tonumber(os.date("%H"))
@@ -637,17 +647,6 @@ local function CreateMainGUI()
     FooterText.Text = "ALADIA SCRIPT | TIME-BASED LICENSE"
     FooterText.TextColor3 = Color3.fromRGB(150, 150, 150)
     FooterText.TextSize = 12
-    
-    -- Click sound with variation
-    local function PlayClickSound()
-        local clickSound = Instance.new("Sound")
-        clickSound.SoundId = "rbxassetid://138080526"
-        clickSound.Volume = 0.3
-        clickSound.Pitch = 0.9 + math.random() * 0.2
-        clickSound.Parent = MainFrame
-        clickSound:Play()
-        game:GetService("Debris"):AddItem(clickSound, 2)
-    end
 
     -- Time-based expiration check
     local function IsKeyExpired(expDateTime)
@@ -826,7 +825,6 @@ local function CreateMainGUI()
         end)
         
         CloseButton.MouseButton1Click:Connect(function()
-            PlayClickSound()
             game:GetService("TweenService"):Create(NoteOverlay, TweenInfo.new(0.3), {
                 BackgroundTransparency = 1
             }):Play()
@@ -990,13 +988,11 @@ local function CreateMainGUI()
         end
         
         YesButton.MouseButton1Click:Connect(function()
-            PlayClickSound()
             CloseDialog()
             confirmCallback(true)
         end)
         
         NoButton.MouseButton1Click:Connect(function()
-            PlayClickSound()
             CloseDialog()
             confirmCallback(false)
         end)
@@ -1012,7 +1008,6 @@ local function CreateMainGUI()
 
     -- Premium Button Functionality with modern design
     PremiumButton.MouseButton1Click:Connect(function()
-        PlayClickSound()
         
         -- Animate button press
         game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.1), {
@@ -1157,7 +1152,6 @@ local function CreateMainGUI()
         VerifyButton.MouseButton1Click:Connect(function()
             if isVerifying then return end
             isVerifying = true
-            PlayClickSound()
             
             -- Animate button press
             game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.1), {
@@ -1324,7 +1318,6 @@ local function CreateMainGUI()
         
         -- Back Button Functionality
         BackButton.MouseButton1Click:Connect(function()
-            PlayClickSound()
             
             -- Animate button press
             game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.1), {
@@ -1347,7 +1340,6 @@ local function CreateMainGUI()
     BasicButton.MouseButton1Click:Connect(function()
         if isConfirming then return end
         isConfirming = true
-        PlayClickSound()
         
         -- Animate button press
         game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.1), {
@@ -1447,7 +1439,6 @@ local function CreateMainGUI()
             end)
         
             BackButton.MouseButton1Click:Connect(function()
-                PlayClickSound()
                 
                 -- Animate button press
                 game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.1), {
