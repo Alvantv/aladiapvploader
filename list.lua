@@ -1,5 +1,5 @@
 -- Admin KemilingHUB
-Usn: Henclin | Key: 1111 | Exp: 01/01/3000
+Usn: Henclin | Key: 1111 | Exp: 01/01/3000 | Admn: true | Note: Head Admin
 Usn: KemilingHUB2 | Key: 1111 | Exp: 01/01/3000
 Usn: Janggaliwir | Key: 1111 | Exp: 01/01/3000
 
