@@ -11,13 +11,13 @@ Usn: sevshtz | Key: jxXepQ5XR | Exp: 1/04/2025 12:57
 
 -- Nbuy User
 Usn: UsernameHere | Nbuy: true | Note: (Optional)
+Usn: DODIKANJUTT | Nbuy: true | Note: buy anjg
 
 -- Note User
 Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
 
 -- Blacklist
 Usn: Henclin | Blacklist: true
-Usn: DODIKANJUTT | Blacklist: true
 
 -- Blacklist (Admin Ingame)
 Usn: niohailhad | Blacklist: true
