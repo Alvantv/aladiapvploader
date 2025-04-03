@@ -1,5 +1,4 @@
 -- Admin KemilingHUB
-Usn: Henclin | Key: 1111 | Exp: 01/01/3000
 Usn: KemilingHUB2 | Key: 1111 | Exp: 01/01/3000
 Usn: Janggaliwir | Key: 1111 | Exp: 01/01/3000
 
@@ -17,6 +16,7 @@ Usn: UsernameHere | Nbuy: true | Note: (Optional)
 Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
 
 -- Blacklist
+Usn: Henclin | Blacklist: true
 Usn: DODIKANJUTT | Blacklist: true
 
 -- Blacklist (Admin Ingame)
