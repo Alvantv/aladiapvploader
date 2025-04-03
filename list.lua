@@ -1,6 +1,6 @@
 -- Admin KemilingHUB
 Usn: Henclin | Key: 1111 | Perm: True
-Usn:KemilingHUB2 | Key:1111 | Perm:True
+Usn: KemilingHUB2 | Key:1111 | Perm:True
 Usn: Janggaliwir | Key: 1111 | Perm: True
 
 -- Permanent User
