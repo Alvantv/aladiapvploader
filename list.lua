@@ -1,15 +1,16 @@
--- Admin
-Usn: Henclin | Key: 1111 | Exp: 01/01/3000
-Usn: KemilingHUB2 | Key: 1111 | Exp: 01/01/3000
-Usn: Janggaliwir | Key: 1111 | Exp: 01/01/3000
+-- Admin KemilingHUB
+Usn: Henclin | Key: 1111 | Perm: True
+Usn: KemilingHUB2 | Key: 1111 | Perm: True
+Usn: Janggaliwir | Key: 1111 | Perm: True
+
+-- Permanent User
+Usn: Test123 | Key: 1111 | Perm: True
 
 -- Free (Premium) user
 Usn: DanzzRBX | Key: 102009 | Exp: 01/01/3000
 
-
 -- Buyer Ingame
 Usn: sevshtz | Key: jxXepQ5XR | Exp: 1/04/2025 12:57
-
 
 -- Nbuy User
 Usn: UsernameHere | Nbuy: true | Note: (Optional)
