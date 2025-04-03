@@ -1,34 +1,31 @@
 --[[
   ALADIA SCRIPT LOADER - PREMIUM VERSION
-  - Ultra-modern neomorphic design
+  - Modern dark theme with soft purple accents
+  - Sleek glassmorphism design elements
   - Smooth animations and transitions
-  - Dynamic color scheme
-  - Improved traffic light animation
-  - Enhanced notification system
-  - Responsive layout
+  - Improved visual hierarchy
+  - Enhanced readability
 ]]
 
 local function CreateMainGUI()
-    -- Modern color scheme with dynamic accent
-    local hour = tonumber(os.date("%H"))
-    local isNight = hour < 6 or hour >= 18
-    local accentColor = isNight and Color3.fromRGB(100, 150, 255) or Color3.fromRGB(70, 200, 200)
-    
+    -- Color scheme - Dark theme with soft purple accents
     local colors = {
-        darkBackground = Color3.fromRGB(20, 20, 25),
-        darkerPanel = Color3.fromRGB(30, 30, 35),
-        darkestPanel = Color3.fromRGB(25, 25, 30),
-        textColor = Color3.fromRGB(240, 240, 240),
-        errorRed = Color3.fromRGB(255, 90, 90),
-        successGreen = Color3.fromRGB(80, 220, 120),
-        warningYellow = Color3.fromRGB(255, 200, 80),
-        buttonHover = Color3.fromRGB(40, 40, 45),
-        lightOff = Color3.fromRGB(50, 50, 55),
-        accentColor = accentColor,
+        darkBackground = Color3.fromRGB(15, 15, 20),
+        darkerPanel = Color3.fromRGB(25, 25, 35),
+        darkestPanel = Color3.fromRGB(20, 20, 30),
+        textColor = Color3.fromRGB(240, 240, 245),
+        accentColor = Color3.fromRGB(150, 110, 220),  -- Soft purple
+        accentLight = Color3.fromRGB(180, 140, 240),  -- Lighter purple
+        errorRed = Color3.fromRGB(220, 90, 100),
+        successGreen = Color3.fromRGB(100, 220, 140),
+        warningYellow = Color3.fromRGB(240, 190, 80),
+        buttonHover = Color3.fromRGB(45, 40, 60),     -- Purple-tinged hover
+        lightOff = Color3.fromRGB(50, 45, 65),
+        glassEffect = Color3.fromRGB(30, 25, 45),
         trafficLight = {
-            red = Color3.fromRGB(255, 80, 80),
-            yellow = Color3.fromRGB(255, 210, 50),
-            green = Color3.fromRGB(80, 255, 80)
+            red = Color3.fromRGB(220, 90, 100),
+            yellow = Color3.fromRGB(240, 190, 80),
+            green = Color3.fromRGB(100, 220, 140)
         }
     }
 
@@ -72,14 +69,16 @@ local function CreateMainGUI()
             return {
                 blacklisted = false,
                 needsPurchase = false,
-                note = ""
+                note = "",
+                expirationDate = "UNKNOWN"
             }
         end
 
         local status = {
             blacklisted = false,
             needsPurchase = false,
-            note = ""
+            note = "",
+            expirationDate = "NOT FOUND"
         }
         
         for line in whitelist:gmatch("[^\r\n]+") do
@@ -103,6 +102,13 @@ local function CreateMainGUI()
                     status.note = note
                 end
             end
+            
+            local user, key, exp = line:match("Usn:%s*(.-)%s*|%s*Key:%s*(%S+)%s*|%s*Exp:%s*(.+)")
+            if user and key and exp then
+                if string.lower(user) == string.lower(currentUsername) then
+                    status.expirationDate = exp
+                end
+            end
         end
         
         return status
@@ -111,46 +117,30 @@ local function CreateMainGUI()
     -- Check user status
     local userStatus = GetUserStatus()
 
-    -- Modern neomorphic shadow function
-    local function CreateNeomorphicShadow(parent, size, position)
-        local shadowGroup = Instance.new("Frame")
-        shadowGroup.BackgroundTransparency = 1
-        shadowGroup.Size = size
-        shadowGroup.Position = position
-        shadowGroup.Parent = parent
+    -- Modern glassmorphism effect function
+    local function CreateGlassEffect(parent, size, position, transparency)
+        local glassFrame = Instance.new("Frame")
+        glassFrame.Name = "GlassEffect"
+        glassFrame.BackgroundColor3 = colors.glassEffect
+        glassFrame.BackgroundTransparency = transparency or 0.7
+        glassFrame.Size = size
+        glassFrame.Position = position
+        glassFrame.Parent = parent
         
-        -- Dark shadow
-        local shadow1 = Instance.new("ImageLabel")
-        shadow1.Name = "Shadow1"
-        shadow1.Image = "rbxassetid://5554236805"
-        shadow1.ScaleType = Enum.ScaleType.Slice
-        shadow1.SliceCenter = Rect.new(10, 10, 118, 118)
-        shadow1.ImageColor3 = Color3.new(0, 0, 0)
-        shadow1.ImageTransparency = 0.8
-        shadow1.Size = UDim2.new(1, 10, 1, 10)
-        shadow1.Position = UDim2.new(0, -5, 0, -5)
-        shadow1.BackgroundTransparency = 1
-        shadow1.Parent = shadowGroup
-        shadow1.ZIndex = -1
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(0, 12)
+        UICorner.Parent = glassFrame
         
-        -- Light shadow
-        local shadow2 = Instance.new("ImageLabel")
-        shadow2.Name = "Shadow2"
-        shadow2.Image = "rbxassetid://5554236805"
-        shadow2.ScaleType = Enum.ScaleType.Slice
-        shadow2.SliceCenter = Rect.new(10, 10, 118, 118)
-        shadow2.ImageColor3 = Color3.new(1, 1, 1)
-        shadow2.ImageTransparency = 0.9
-        shadow2.Size = UDim2.new(1, -10, 1, -10)
-        shadow2.Position = UDim2.new(0, 5, 0, 5)
-        shadow2.BackgroundTransparency = 1
-        shadow2.Parent = shadowGroup
-        shadow2.ZIndex = -1
+        local UIStroke = Instance.new("UIStroke")
+        UIStroke.Color = colors.accentColor
+        UIStroke.Thickness = 1
+        UIStroke.Transparency = 0.8
+        UIStroke.Parent = glassFrame
         
-        return shadowGroup
+        return glassFrame
     end
 
-    -- Main container with neomorphic design
+    -- Main container with glassmorphism design
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
@@ -161,8 +151,8 @@ local function CreateMainGUI()
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.ClipsDescendants = true
 
-    -- Add neomorphic shadow
-    CreateNeomorphicShadow(MainFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+    -- Add glass effect
+    CreateGlassEffect(MainFrame, UDim2.new(1, -10, 1, -10), UDim2.new(0, 5, 0, 5), 0.8)
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 12)
@@ -311,7 +301,7 @@ local function CreateMainGUI()
         game:GetService("TweenService"):Create(GreenLight, TweenInfo.new(0.3), {
             BackgroundColor3 = colors.trafficLight.green
         }):Play()
-        task.wait(10)
+        task.wait(15)
         
         -- Final state based on user status
         if userStatus.blacklisted then
@@ -352,7 +342,7 @@ local function CreateMainGUI()
     Title.TextXAlignment = Enum.TextXAlignment.Left
     
     local TitleStroke = Instance.new("UIStroke")
-    TitleStroke.Color = colors.accentColor
+    TitleStroke.Color = colors.accentLight
     TitleStroke.Thickness = 0.5
     TitleStroke.Transparency = 0.7
     TitleStroke.Parent = Title
@@ -369,7 +359,7 @@ local function CreateMainGUI()
         Notification.Position = UDim2.new(0.5, -150, 1, 0)
         Notification.AnchorPoint = Vector2.new(0.5, 0)
         
-        CreateNeomorphicShadow(Notification, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(Notification, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.8)
         
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 12)
@@ -411,7 +401,7 @@ local function CreateMainGUI()
         
         game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.3), {
             Position = UDim2.new(0.5, -150, 1, -70),
-            BackgroundTransparency = 0
+            BackgroundTransparency = 0.2
         }):Play()
         
         game:GetService("TweenService"):Create(NotifText, TweenInfo.new(0.3), {
@@ -447,7 +437,7 @@ local function CreateMainGUI()
     MenuButton.Parent = MainFrame
     MenuButton.BackgroundTransparency = 1
     MenuButton.Size = UDim2.new(0, 32, 0, 32)
-    MenuButton.Position = UDim2.new(1, -40, 1, -40)
+    MenuButton.Position = UDim2.new(1, -40, 1.02, -40)
     MenuButton.Image = "rbxassetid://3926305904"
     MenuButton.ImageRectOffset = Vector2.new(964, 324)
     MenuButton.ImageRectSize = Vector2.new(36, 36)
@@ -456,7 +446,7 @@ local function CreateMainGUI()
 
     MenuButton.MouseEnter:Connect(function()
         game:GetService("TweenService"):Create(MenuButton, TweenInfo.new(0.2), {
-            ImageColor3 = colors.textColor,
+            ImageColor3 = colors.accentLight,
             Rotation = 15
         }):Play()
     end)
@@ -539,7 +529,7 @@ local function CreateMainGUI()
     PremiumButton.AutoButtonColor = false
     PremiumButton.AnchorPoint = Vector2.new(0.5, 0)
 
-    CreateNeomorphicShadow(PremiumButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+    CreateGlassEffect(PremiumButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
 
     local PremiumCorner = Instance.new("UICorner")
     PremiumCorner.CornerRadius = UDim.new(0, 8)
@@ -547,7 +537,7 @@ local function CreateMainGUI()
 
     local PremiumStroke = Instance.new("UIStroke")
     PremiumStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    PremiumStroke.Color = colors.accentColor
+    PremiumStroke.Color = colors.accentLight
     PremiumStroke.Thickness = 1
     PremiumStroke.Transparency = 0.7
     PremiumStroke.Parent = PremiumButton
@@ -556,10 +546,10 @@ local function CreateMainGUI()
     PremiumButton.MouseEnter:Connect(function()
         game:GetService("TweenService"):Create(PremiumButton, TweenInfo.new(0.2), {
             BackgroundColor3 = colors.buttonHover,
-            TextColor3 = colors.accentColor
+            TextColor3 = colors.accentLight
         }):Play()
         game:GetService("TweenService"):Create(PremiumStroke, TweenInfo.new(0.2), {
-            Transparency = 0
+            Transparency = 0.3
         }):Play()
     end)
     
@@ -587,7 +577,7 @@ local function CreateMainGUI()
     BasicButton.AutoButtonColor = false
     BasicButton.AnchorPoint = Vector2.new(0.5, 0)
 
-    CreateNeomorphicShadow(BasicButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+    CreateGlassEffect(BasicButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
 
     local BasicCorner = Instance.new("UICorner")
     BasicCorner.CornerRadius = UDim.new(0, 8)
@@ -595,7 +585,7 @@ local function CreateMainGUI()
 
     local BasicStroke = Instance.new("UIStroke")
     BasicStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    BasicStroke.Color = colors.accentColor
+    BasicStroke.Color = colors.accentLight
     BasicStroke.Thickness = 1
     BasicStroke.Transparency = 0.7
     BasicStroke.Parent = BasicButton
@@ -604,10 +594,10 @@ local function CreateMainGUI()
     BasicButton.MouseEnter:Connect(function()
         game:GetService("TweenService"):Create(BasicButton, TweenInfo.new(0.2), {
             BackgroundColor3 = colors.buttonHover,
-            TextColor3 = colors.accentColor
+            TextColor3 = colors.accentLight
         }):Play()
         game:GetService("TweenService"):Create(BasicStroke, TweenInfo.new(0.2), {
-            Transparency = 0
+            Transparency = 0.3
         }):Play()
     end)
     
@@ -644,7 +634,7 @@ local function CreateMainGUI()
     FooterText.BackgroundTransparency = 1
     FooterText.Size = UDim2.new(1, 0, 1, 0)
     FooterText.Font = Enum.Font.Gotham
-    FooterText.Text = "ALADIA SCRIPT | TIME-BASED LICENSE"
+    FooterText.Text = "KEMILING-HUB | Powered By Aruze"
     FooterText.TextColor3 = Color3.fromRGB(150, 150, 150)
     FooterText.TextSize = 12
 
@@ -714,7 +704,7 @@ local function CreateMainGUI()
         NoteContainer.AnchorPoint = Vector2.new(0.5, 0.5)
         NoteContainer.ZIndex = 51
         
-        CreateNeomorphicShadow(NoteContainer, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(NoteContainer, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.8)
         
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 12)
@@ -804,7 +794,7 @@ local function CreateMainGUI()
         CloseButton.AutoButtonColor = false
         CloseButton.ZIndex = 52
         
-        CreateNeomorphicShadow(CloseButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(CloseButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         local UICorner2 = Instance.new("UICorner")
         UICorner2.CornerRadius = UDim.new(0, 8)
@@ -813,7 +803,7 @@ local function CreateMainGUI()
         CloseButton.MouseEnter:Connect(function()
             game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
                 BackgroundColor3 = colors.buttonHover,
-                TextColor3 = colors.accentColor
+                TextColor3 = colors.accentLight
             }):Play()
         end)
         
@@ -866,7 +856,7 @@ local function CreateMainGUI()
         DialogFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         DialogFrame.ZIndex = 11
         
-        CreateNeomorphicShadow(DialogFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(DialogFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.8)
         
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 12)
@@ -927,7 +917,7 @@ local function CreateMainGUI()
         NoButton.LayoutOrder = 1
         NoButton.ZIndex = 13
         
-        CreateNeomorphicShadow(NoButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(NoButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         local YesButton = Instance.new("TextButton")
         YesButton.Name = "YesButton"
@@ -942,7 +932,7 @@ local function CreateMainGUI()
         YesButton.LayoutOrder = 2
         YesButton.ZIndex = 13
         
-        CreateNeomorphicShadow(YesButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(YesButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         -- Button hover effects
         NoButton.MouseEnter:Connect(function()
@@ -1028,17 +1018,36 @@ local function CreateMainGUI()
         LicenseFrame.Size = UDim2.new(1, 0, 1, -60)
         LicenseFrame.Position = UDim2.new(0, 0, 0, 60)
         
+        -- Account info with expiration date
+        local AccountInfo = Instance.new("Frame")
+        AccountInfo.Name = "AccountInfo"
+        AccountInfo.Parent = LicenseFrame
+        AccountInfo.BackgroundTransparency = 1
+        AccountInfo.Size = UDim2.new(1, -40, 0, 40)
+        AccountInfo.Position = UDim2.new(0, 20, 0, 10)
+        
         local UsernameLabel = Instance.new("TextLabel")
         UsernameLabel.Name = "UsernameLabel"
-        UsernameLabel.Parent = LicenseFrame
+        UsernameLabel.Parent = AccountInfo
         UsernameLabel.BackgroundTransparency = 1
-        UsernameLabel.Position = UDim2.new(0, 20, 0.1, 0)
-        UsernameLabel.Size = UDim2.new(1, -40, 0, 20)
+        UsernameLabel.Size = UDim2.new(0.5, 0, 1, 0)
         UsernameLabel.Font = Enum.Font.GothamBold
         UsernameLabel.Text = "ACCOUNT: "..string.upper(currentUsername)
         UsernameLabel.TextColor3 = colors.accentColor
         UsernameLabel.TextSize = 14
         UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local ExpirationLabel = Instance.new("TextLabel")
+        ExpirationLabel.Name = "ExpirationLabel"
+        ExpirationLabel.Parent = AccountInfo
+        ExpirationLabel.BackgroundTransparency = 1
+        ExpirationLabel.Size = UDim2.new(0.5, 0, 1, 0)
+        ExpirationLabel.Position = UDim2.new(0.5, 0, 0, 0)
+        ExpirationLabel.Font = Enum.Font.GothamBold
+        ExpirationLabel.Text = "EXP: "..userStatus.expirationDate
+        ExpirationLabel.TextColor3 = colors.accentLight
+        ExpirationLabel.TextSize = 14
+        ExpirationLabel.TextXAlignment = Enum.TextXAlignment.Right
         
         local StatusLabel = Instance.new("TextLabel")
         StatusLabel.Name = "StatusLabel"
@@ -1060,7 +1069,7 @@ local function CreateMainGUI()
         KeyInputContainer.Size = UDim2.new(0, 280, 0, 50)
         KeyInputContainer.AnchorPoint = Vector2.new(0.5, 0)
         
-        CreateNeomorphicShadow(KeyInputContainer, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(KeyInputContainer, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 8)
@@ -1093,7 +1102,7 @@ local function CreateMainGUI()
         VerifyButton.AutoButtonColor = false
         VerifyButton.AnchorPoint = Vector2.new(0.5, 0)
         
-        CreateNeomorphicShadow(VerifyButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(VerifyButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         local UICorner2 = Instance.new("UICorner")
         UICorner2.CornerRadius = UDim.new(0, 8)
@@ -1112,7 +1121,7 @@ local function CreateMainGUI()
         BackButton.AutoButtonColor = false
         BackButton.AnchorPoint = Vector2.new(0.5, 0)
         
-        CreateNeomorphicShadow(BackButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+        CreateGlassEffect(BackButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
         
         local UICorner3 = Instance.new("UICorner")
         UICorner3.CornerRadius = UDim.new(0, 8)
@@ -1122,7 +1131,7 @@ local function CreateMainGUI()
         VerifyButton.MouseEnter:Connect(function()
             game:GetService("TweenService"):Create(VerifyButton, TweenInfo.new(0.2), {
                 BackgroundColor3 = colors.buttonHover,
-                TextColor3 = colors.accentColor
+                TextColor3 = colors.accentLight
             }):Play()
         end)
         
@@ -1136,7 +1145,7 @@ local function CreateMainGUI()
         BackButton.MouseEnter:Connect(function()
             game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.2), {
                 BackgroundColor3 = colors.buttonHover,
-                TextColor3 = colors.accentColor
+                TextColor3 = colors.accentLight
             }):Play()
         end)
         
@@ -1236,74 +1245,67 @@ local function CreateMainGUI()
                     StatusLabel.Text = "LICENSE EXPIRED ("..expirationDate..")"
                     StatusLabel.TextColor3 = colors.errorRed
                 else
-                    StatusLabel.Text = ""
+                    StatusLabel.Text = "VERIFICATION SUCCESSFUL!"
+                    StatusLabel.TextColor3 = colors.successGreen
                     
-                    if note ~= "" then
-                        ShowFullScreenNote(note)
-                        
-                        task.delay(5, function()
-                            LicenseFrame:Destroy()
-                            Title.Text = "KemilingHUB | Aladia"
-                            PremiumButton.Visible = true
-                            BasicButton.Visible = true
-                        end)
-                    else
-                        CreateConfirmationDialog(
-                            "PREMIUM SCRIPT", 
-                            "Are you sure you want to load the premium script?\nExpires: "..expirationDate,
-                            function(confirmed)
-                                if confirmed then
-                                    local LoadingFrame = Instance.new("Frame")
-                                    LoadingFrame.Name = "LoadingFrame"
-                                    LoadingFrame.Parent = MainFrame
-                                    LoadingFrame.BackgroundColor3 = colors.darkestPanel
-                                    LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
-                                    LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
-                                    LoadingFrame.AnchorPoint = Vector2.new(0, 1)
-                                    
-                                    CreateNeomorphicShadow(LoadingFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
-                                    
-                                    local LoadingBar = Instance.new("Frame")
-                                    LoadingBar.Name = "LoadingBar"
-                                    LoadingBar.Parent = LoadingFrame
-                                    LoadingBar.BackgroundColor3 = colors.accentColor
-                                    LoadingBar.Size = UDim2.new(0, 0, 1, 0)
-
-                                    local LoadingText = Instance.new("TextLabel")
-                                    LoadingText.Name = "LoadingText"
-                                    LoadingText.Parent = LoadingFrame
-                                    LoadingText.BackgroundTransparency = 1
-                                    LoadingText.Size = UDim2.new(1, 0, 1, 0)
-                                    LoadingText.Font = Enum.Font.GothamBold
-                                    LoadingText.Text = "LOADING PREMIUM: 0%"
-                                    LoadingText.TextColor3 = colors.textColor
-                                    LoadingText.TextSize = 14
-
-                                    local duration = 1
-                                    local startTime = tick()
-                                    
-                                    local function update()
-                                        local elapsed = tick() - startTime
-                                        local progress = math.min(elapsed/duration, 1)
-                                        
-                                        LoadingBar.Size = UDim2.new(progress, 0, 1, 0)
-                                        LoadingText.Text = "LOADING PREMIUM: "..math.floor(progress*100).."%"
-                                        
-                                        if progress < 1 then
-                                            task.wait()
-                                            update()
-                                        else
-                                            task.wait(0.5)
-                                            ScreenGui:Destroy()
-                                            loadstring(game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvpa/refs/heads/main/vipa.lua"))()
-                                        end
-                                    end
-                                    
-                                    update()
-                                end
-                            end
-                        )
+                    -- Wait 5 seconds before loading premium script
+                    VerifyButton.Text = "LOADING IN 3 SECONDS..."
+                    
+                    for i = 4, 1, -1 do
+                        task.wait(1)
+                        VerifyButton.Text = "LOADING IN "..i.." SECONDS..."
                     end
+                    
+                    task.wait(1)
+                    
+                    -- Load premium script
+                    local LoadingFrame = Instance.new("Frame")
+                    LoadingFrame.Name = "LoadingFrame"
+                    LoadingFrame.Parent = MainFrame
+                    LoadingFrame.BackgroundColor3 = colors.darkestPanel
+                    LoadingFrame.Size = UDim2.new(1, 0, 0, 30)
+                    LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
+                    LoadingFrame.AnchorPoint = Vector2.new(0, 1)
+                    
+                    CreateGlassEffect(LoadingFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
+                    
+                    local LoadingBar = Instance.new("Frame")
+                    LoadingBar.Name = "LoadingBar"
+                    LoadingBar.Parent = LoadingFrame
+                    LoadingBar.BackgroundColor3 = colors.accentColor
+                    LoadingBar.Size = UDim2.new(0, 0, 1, 0)
+
+                    local LoadingText = Instance.new("TextLabel")
+                    LoadingText.Name = "LoadingText"
+                    LoadingText.Parent = LoadingFrame
+                    LoadingText.BackgroundTransparency = 1
+                    LoadingText.Size = UDim2.new(1, 0, 1, 0)
+                    LoadingText.Font = Enum.Font.GothamBold
+                    LoadingText.Text = "LOADING PREMIUM: 0%"
+                    LoadingText.TextColor3 = colors.textColor
+                    LoadingText.TextSize = 14
+
+                    local duration = 1
+                    local startTime = tick()
+                    
+                    local function update()
+                        local elapsed = tick() - startTime
+                        local progress = math.min(elapsed/duration, 1)
+                        
+                        LoadingBar.Size = UDim2.new(progress, 0, 1, 0)
+                        LoadingText.Text = "LOADING PREMIUM: "..math.floor(progress*100).."%"
+                        
+                        if progress < 1 then
+                            task.wait()
+                            update()
+                        else
+                            task.wait(0.5)
+                            ScreenGui:Destroy()
+                            loadstring(game:HttpGet("https://raw.githubusercontent.com/Alvantv/aladiapvpa/refs/heads/main/vipa.lua"))()
+                        end
+                    end
+                    
+                    update()
                 end
             else
                 StatusLabel.Text = "INVALID LICENSE KEY"
@@ -1370,7 +1372,7 @@ local function CreateMainGUI()
             WarningIcon.Parent = BlankFrame
             WarningIcon.BackgroundTransparency = 1
             WarningIcon.Size = UDim2.new(0, 64, 0, 64)
-            WarningIcon.Position = UDim2.new(0.5, -32, 0.2, 0)
+            WarningIcon.Position = UDim2.new(0.5, -32, 0, 0)
             WarningIcon.Image = "rbxassetid://3926305904"
             WarningIcon.ImageRectOffset = Vector2.new(364, 364)
             WarningIcon.ImageRectSize = Vector2.new(36, 36)
@@ -1382,7 +1384,7 @@ local function CreateMainGUI()
             WarningText.Parent = BlankFrame
             WarningText.BackgroundTransparency = 1
             WarningText.Size = UDim2.new(1, -40, 0, 40)
-            WarningText.Position = UDim2.new(0, 20, 0.3, 0)
+            WarningText.Position = UDim2.new(0, 20, 0.23, 0)
             WarningText.Font = Enum.Font.GothamBold
             WarningText.Text = "UPGRADE REQUIRED"
             WarningText.TextColor3 = colors.warningYellow
@@ -1396,9 +1398,9 @@ local function CreateMainGUI()
             PurchaseText.Parent = BlankFrame
             PurchaseText.BackgroundTransparency = 1
             PurchaseText.Size = UDim2.new(1, -40, 0, 80)
-            PurchaseText.Position = UDim2.new(0, 20, 0.4, 0)
+            PurchaseText.Position = UDim2.new(0, 20, 0.34, 0)
             PurchaseText.Font = Enum.Font.Gotham
-            PurchaseText.Text = "Your free script access has expired.\n\nUpgrade to premium for 30k/day to continue using the script."
+            PurchaseText.Text = "Your free script access has expired.\n\nUpgrade to premium for 180k - 7 Days to continue using the script."
             PurchaseText.TextColor3 = colors.textColor
             PurchaseText.TextSize = 14
             PurchaseText.TextWrapped = true
@@ -1410,14 +1412,14 @@ local function CreateMainGUI()
             BackButton.Parent = BlankFrame
             BackButton.BackgroundColor3 = colors.darkestPanel
             BackButton.Size = UDim2.new(0.6, 0, 0, 40)
-            BackButton.Position = UDim2.new(0.2, 0, 0.8, 0)
+            BackButton.Position = UDim2.new(0.2, 0, 0.65, 0)
             BackButton.Font = Enum.Font.GothamBold
             BackButton.Text = "BACK"
             BackButton.TextColor3 = colors.textColor
             BackButton.TextSize = 14
             BackButton.AutoButtonColor = false
         
-            CreateNeomorphicShadow(BackButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+            CreateGlassEffect(BackButton, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
             
             local UICorner = Instance.new("UICorner")
             UICorner.CornerRadius = UDim.new(0, 8)
@@ -1427,7 +1429,7 @@ local function CreateMainGUI()
             BackButton.MouseEnter:Connect(function()
                 game:GetService("TweenService"):Create(BackButton, TweenInfo.new(0.2), {
                     BackgroundColor3 = colors.buttonHover,
-                    TextColor3 = colors.accentColor
+                    TextColor3 = colors.accentLight
                 }):Play()
             end)
             
@@ -1479,7 +1481,7 @@ local function CreateMainGUI()
                     LoadingFrame.Position = UDim2.new(0, 0, 1, -30)
                     LoadingFrame.AnchorPoint = Vector2.new(0, 1)
                     
-                    CreateNeomorphicShadow(LoadingFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+                    CreateGlassEffect(LoadingFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.9)
                     
                     local LoadingBar = Instance.new("Frame")
                     LoadingBar.Name = "LoadingBar"
@@ -1558,7 +1560,7 @@ if not success then
     ErrorFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
     ErrorFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     
-    CreateNeomorphicShadow(ErrorFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0))
+    CreateGlassEffect(ErrorFrame, UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), 0.8)
     
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 12)
