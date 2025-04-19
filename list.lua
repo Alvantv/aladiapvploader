@@ -18,7 +18,7 @@ Usn: usrenamea | Nbuy: true
 Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
 
 -- Blacklist
-Usn: DODIKANJUTT | Blacklist: true
+Usn: venzrazel | Blacklist: true
 
 -- Blacklist (Admin Ingame)
 Usn: niohailhad | Blacklist: true
