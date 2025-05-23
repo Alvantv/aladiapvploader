@@ -12,7 +12,7 @@ Usn: Sad_FahriINDO | Key: wD29U65n9e | Exp: 10/04/2025
 Usn: sevshtz | Key: jxXepQ5XR | Exp: 1/04/2025 12:57
 
 -- Nbuy User
-Usn: usrenamea | Nbuy: true
+Usn: Henclin | Nbuy: true
 
 -- Note User
 Usn: ATHONKGAMING | Key: ucNXxhceLy | Note: JAWA JAWA JAWA
