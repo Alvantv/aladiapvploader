@@ -6,6 +6,7 @@ Usn: Pengemudisumatra | Key: 1111 | Exp: 01/01/3000
 
 -- Free (Premium) user
 Usn: DanzzRBX | Key: 102009 | Exp: 01/01/3000
+Usn: ScriosUNdeath | Key: 09321 | Exp: 01/01/3000
 Usn: Sad_FahriINDO | Key: wD29U65n9e | Exp: 10/04/2025
 
 -- Buyer Ingame
